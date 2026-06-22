@@ -1,0 +1,65 @@
+vehicles:
+  default_car:
+    frame:
+      material: BARRIER
+      custom-model-data: 1
+      offset:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+    steering-wheel:
+      material: BARRIER
+      custom-model-data: 2
+      offset:
+        x: 0.3
+        y: 0.8
+        z: 0.2
+    doors:
+      - type: LEFT
+        material: BARRIER
+        custom-model-data: 3
+        offset:
+          x: -0.8
+          y: 0.5
+          z: 0.0
+      - type: RIGHT
+        material: BARRIER
+        custom-model-data: 3
+        offset:
+          x: 0.8
+          y: 0.5
+          z: 0.0
+    wheels:
+      - type: LEFT
+        material: BARRIER
+        custom-model-data: 4
+        offset:
+          x: -0.7
+          y: 0.0
+          z: -1.0
+      - type: RIGHT
+        material: BARRIER
+        custom-model-data: 4
+        offset:
+          x: 0.7
+          y: 0.0
+          z: -1.0
+      - type: LEFT
+        material: BARRIER
+        custom-model-data: 4
+        offset:
+          x: -0.7
+          y: 0.0
+          z: 1.0
+      - type: RIGHT
+        material: BARRIER
+        custom-model-data: 4
+        offset:
+          x: 0.7
+          y: 0.0
+          z: 1.0
+    seat:
+      offset:
+        x: 0.0
+        y: 0.5
+        z: 0.0

@@ -1,0 +1,17 @@
+name: unique-vehicle-plugin
+version: '${version}'
+
+main: com.jvmd.uniqueVehiclePlugin.UniqueVehiclePlugin
+api-version: '1.21.4'
+load: POSTWORLD
+
+commands:
+  vehicle:
+    description: Manage vehicles
+    usage: /vehicle <spawn|remove|list>
+    permission: uniquevehicle.use
+
+permissions:
+  uniquevehicle.use:
+    description: Allows using vehicle commands
+    default: op
