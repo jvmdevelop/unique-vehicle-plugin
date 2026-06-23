@@ -2,7 +2,10 @@ package com.jvmd.uniqueVehiclePlugin.command;
 
 import com.jvmd.uniqueVehiclePlugin.assembler.VehicleAssembler;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
+import com.jvmd.uniqueVehiclePlugin.customization.VehicleCustomization;
+import com.jvmd.uniqueVehiclePlugin.customization.VehicleDatabase;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
+import com.jvmd.uniqueVehiclePlugin.gui.VehicleEditorGui;
 import com.jvmd.uniqueVehiclePlugin.registry.VehicleRegistry;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,11 +23,16 @@ public class VehicleCommand implements CommandExecutor, TabCompleter {
     private final Map<String, VehicleConfig> vehicleConfigs;
     private final VehicleAssembler assembler;
     private final VehicleRegistry registry;
+    private final VehicleDatabase database;
+    private final VehicleEditorGui editorGui;
 
-    public VehicleCommand(Map<String, VehicleConfig> vehicleConfigs, VehicleAssembler assembler, VehicleRegistry registry) {
+    public VehicleCommand(Map<String, VehicleConfig> vehicleConfigs, VehicleAssembler assembler,
+                          VehicleRegistry registry, VehicleDatabase database, VehicleEditorGui editorGui) {
         this.vehicleConfigs = vehicleConfigs;
         this.assembler = assembler;
         this.registry = registry;
+        this.database = database;
+        this.editorGui = editorGui;
     }
 
     @Override
@@ -35,85 +43,66 @@ public class VehicleCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            player.sendMessage("Usage: /vehicle <spawn|remove|list>");
+            player.sendMessage("Usage: /vehicle <spawn|remove|list|edit>");
             return true;
         }
 
         switch (args[0].toLowerCase()) {
-            case "spawn" -> handleSpawn(player, args);
+            case "spawn"  -> handleSpawn(player, args);
             case "remove" -> handleRemove(player);
-            case "list" -> handleList(player);
-            default -> player.sendMessage("Usage: /vehicle <spawn|remove|list>");
+            case "list"   -> handleList(player);
+            case "edit"   -> handleEdit(player);
+            default       -> player.sendMessage("Usage: /vehicle <spawn|remove|list|edit>");
         }
 
         return true;
     }
 
     private void handleSpawn(Player player, String[] args) {
-        if (args.length < 2) {
-            player.sendMessage("Usage: /vehicle spawn <id>");
-            return;
-        }
-
+        if (args.length < 2) { player.sendMessage("Usage: /vehicle spawn <id>"); return; }
         String id = args[1].toLowerCase();
         VehicleConfig config = vehicleConfigs.get(id);
-        if (config == null) {
-            player.sendMessage("Unknown vehicle: " + id);
-            return;
-        }
-
-        Vehicle vehicle = assembler.assemble(config, player.getLocation());
+        if (config == null) { player.sendMessage("Unknown vehicle: " + id); return; }
+        VehicleCustomization customization = database.load(id);
+        Vehicle vehicle = assembler.assemble(config, player.getLocation(), customization);
         registry.register(vehicle);
         player.sendMessage("Vehicle '" + id + "' spawned.");
     }
 
     private void handleRemove(Player player) {
         Vehicle vehicle = registry.getByPassenger(player);
-
-        if (vehicle == null) {
-            vehicle = findNearest(player);
-        }
-
-        if (vehicle == null) {
-            player.sendMessage("No vehicle found nearby.");
-            return;
-        }
-
+        if (vehicle == null) vehicle = findNearest(player);
+        if (vehicle == null) { player.sendMessage("No vehicle found nearby."); return; }
         registry.unregister(vehicle);
         player.sendMessage("Vehicle removed.");
     }
 
     private void handleList(Player player) {
-        if (vehicleConfigs.isEmpty()) {
-            player.sendMessage("No vehicles configured.");
-            return;
-        }
-
+        if (vehicleConfigs.isEmpty()) { player.sendMessage("No vehicles configured."); return; }
         player.sendMessage("Available vehicles: " + String.join(", ", vehicleConfigs.keySet()));
+    }
+
+    private void handleEdit(Player player) {
+        Vehicle vehicle = registry.getByPassenger(player);
+        if (vehicle == null) vehicle = findNearest(player);
+        if (vehicle == null) { player.sendMessage("No vehicle found nearby (within 10 blocks)."); return; }
+        editorGui.open(player, vehicle);
     }
 
     private Vehicle findNearest(Player player) {
         Vehicle nearest = null;
         double nearestDist = 10.0;
-
         for (Vehicle vehicle : registry.getVehicles()) {
             double dist = vehicle.getLocation().distanceSquared(player.getLocation());
-            if (dist < nearestDist) {
-                nearestDist = dist;
-                nearest = vehicle;
-            }
+            if (dist < nearestDist) { nearestDist = dist; nearest = vehicle; }
         }
         return nearest;
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (args.length == 1) {
-            return List.of("spawn", "remove", "list");
-        }
-        if (args.length == 2 && args[0].equalsIgnoreCase("spawn")) {
-            return new ArrayList<>(vehicleConfigs.keySet());
-        }
+        if (args.length == 1) return List.of("spawn", "remove", "list", "edit");
+        if (args.length == 2 && args[0].equalsIgnoreCase("spawn")) return new ArrayList<>(vehicleConfigs.keySet());
         return List.of();
     }
 }

@@ -1,6 +1,5 @@
 package com.jvmd.uniqueVehiclePlugin.task;
 
-import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleBodyManager;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleMovingManager;
 import com.jvmd.uniqueVehiclePlugin.registry.VehicleRegistry;
@@ -24,9 +23,5 @@ public class VehicleTickTask extends BukkitRunnable {
 
         movingManager.manage();
         bodyManager.manage();
-
-        for (Vehicle vehicle : registry.getVehicles()) {
-            vehicle.teleportSeat();
-        }
     }
 }

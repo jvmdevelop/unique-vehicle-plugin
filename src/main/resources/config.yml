@@ -1,65 +1,109 @@
 vehicles:
-  default_car:
+  my_car:
     frame:
       material: BARRIER
       custom-model-data: 1
       offset:
-        x: 0.0
-        y: 0.0
-        z: 0.0
+        x: 1.125
+        y: 0
+        z: 1.625
     steering-wheel:
       material: BARRIER
       custom-model-data: 2
       offset:
-        x: 0.3
-        y: 0.8
-        z: 0.2
+        x: 0.5
+        y: 0.5
+        z: 0.5
+      pivot:
+        x: -0.0313
+        y: 0.4375
+        z: 0.375
     doors:
       - type: LEFT
         material: BARRIER
         custom-model-data: 3
         offset:
-          x: -0.8
+          x: 0.5
           y: 0.5
-          z: 0.0
+          z: 0.5
+        pivot:
+          x: 0.5625
+          y: 0.4375
+          z: 0.5
       - type: RIGHT
         material: BARRIER
         custom-model-data: 3
         offset:
-          x: 0.8
+          x: 0.5
           y: 0.5
-          z: 0.0
+          z: 0.5
+        pivot:
+          x: -0.5625
+          y: 0.4375
+          z: 0.5
     wheels:
       - type: LEFT
+        front: true
         material: BARRIER
         custom-model-data: 4
         offset:
-          x: -0.7
-          y: 0.0
-          z: -1.0
+          x: 1.125
+          y: 0.1875
+          z: 1.425
+        pivot:
+          x: 0.0586
+          y: 0
+          z: 0
       - type: RIGHT
+        front: true
         material: BARRIER
         custom-model-data: 4
         offset:
-          x: 0.7
-          y: 0.0
-          z: -1.0
+          x: -1.125
+          y: 0.1875
+          z: 1.425
+        pivot:
+          x: -0.0586
+          y: 0
+          z: 0
       - type: LEFT
+        front: false
         material: BARRIER
         custom-model-data: 4
         offset:
-          x: -0.7
-          y: 0.0
-          z: 1.0
+          x: 1.125
+          y: 0.1875
+          z: 1.425
+        pivot:
+          x: 0.0586
+          y: 0
+          z: -1.875
       - type: RIGHT
+        front: false
         material: BARRIER
         custom-model-data: 4
         offset:
-          x: 0.7
-          y: 0.0
-          z: 1.0
+          x: -1.125
+          y: 0.1875
+          z: 1.425
+        pivot:
+          x: -0.0586
+          y: 0
+          z: -1.875
     seat:
       offset:
-        x: 0.0
+        x: 0.5
         y: 0.5
-        z: 0.0
+        z: 0.5
+    physics:
+      max-speed: 1.2
+      acceleration: 0.05
+      friction: 0.02
+      turn-rate: 3.5
+      brake-force: 0.08
+      reverse-max-speed: 0.4
+      reverse-acceleration: 0.03
+      drift-brake-force: 0.04
+      drift-turn-multiplier: 1.8
+      vehicle-width: 0.8
+      vehicle-length: 1.2

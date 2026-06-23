@@ -1,5 +1,6 @@
 package com.jvmd.uniqueVehiclePlugin.processor.impl;
 
+import com.jvmd.uniqueVehiclePlugin.customization.PartCustomization;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.entity.VehicleFrame;
 import com.jvmd.uniqueVehiclePlugin.processor.Processor;
@@ -16,10 +17,16 @@ public class VehicleFrameProcessor extends Processor {
     @Override
     protected void processVehicle(Vehicle vehicle) {
         VehicleFrame frame = vehicle.getFrame();
-        Location loc = computePartLocation(vehicle, frame.getOffset().x, frame.getOffset().y, frame.getOffset().z);
+        PartCustomization c = vehicle.getCustomization().getPart("frame");
+
+        Location loc = computePartLocation(vehicle,
+                frame.getOffset().x + c.getDeltaX(),
+                frame.getOffset().y + c.getDeltaY(),
+                frame.getOffset().z + c.getDeltaZ());
         loc.setYaw(vehicle.getLocation().getYaw());
 
         frame.getItemDisplay().teleport(loc);
+        vehicle.teleportSeat();
     }
 
     private Location computePartLocation(Vehicle vehicle, double ox, double oy, double oz) {

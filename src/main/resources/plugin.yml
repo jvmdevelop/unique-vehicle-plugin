@@ -8,7 +8,7 @@ load: POSTWORLD
 commands:
   vehicle:
     description: Manage vehicles
-    usage: /vehicle <spawn|remove|list>
+    usage: /vehicle <spawn|remove|list|edit>
     permission: uniquevehicle.use
 
 permissions:

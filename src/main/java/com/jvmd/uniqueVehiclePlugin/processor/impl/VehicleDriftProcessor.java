@@ -1,5 +1,6 @@
 package com.jvmd.uniqueVehiclePlugin.processor.impl;
 
+import com.jvmd.uniqueVehiclePlugin.config.PhysicsConfig;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.entity.Wheel;
 import com.jvmd.uniqueVehiclePlugin.processor.Processor;
@@ -11,9 +12,6 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public class VehicleDriftProcessor extends Processor {
-
-    private static final double DRIFT_BRAKE_FORCE = 0.04;
-    private static final float DRIFT_TURN_MULTIPLIER = 1.8f;
 
     public VehicleDriftProcessor(List<Vehicle> vehicles) {
         super(vehicles);
@@ -28,15 +26,16 @@ public class VehicleDriftProcessor extends Processor {
         }
 
         Input input = driver.getCurrentInput();
+        PhysicsConfig physics = vehicle.getPhysics();
 
         if (input.isJump() && vehicle.getSpeed() > 0.1) {
             vehicle.setDrifting(true);
-            vehicle.setSpeed(Math.max(vehicle.getSpeed() - DRIFT_BRAKE_FORCE, 0));
+            vehicle.setSpeed(Math.max(vehicle.getSpeed() - physics.driftBrakeForce(), 0));
 
             if (input.isLeft() || input.isRight()) {
                 Location loc = vehicle.getLocation();
                 float yaw = loc.getYaw();
-                float turn = DRIFT_TURN_MULTIPLIER;
+                float turn = physics.driftTurnMultiplier();
 
                 if (input.isLeft()) yaw -= turn;
                 if (input.isRight()) yaw += turn;
@@ -58,6 +57,8 @@ public class VehicleDriftProcessor extends Processor {
         double sin = Math.sin(rad);
 
         for (Wheel wheel : vehicle.getWheels()) {
+            if (wheel.isFront()) continue; // Smoke only from rear wheels
+
             double ox = wheel.getOffset().x;
             double oy = wheel.getOffset().y;
             double oz = wheel.getOffset().z;

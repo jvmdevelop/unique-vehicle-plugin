@@ -11,10 +11,11 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    implementation("org.xerial:sqlite-jdbc:3.49.1.0")
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(26)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 tasks {
@@ -23,6 +24,7 @@ tasks {
     }
 
     runServer {
+        dependsOn(shadowJar)
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.
         // Your plugin's jar (or shadowJar if present) will be used automatically.

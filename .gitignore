@@ -1,4 +1,10 @@
-.gradle/
+# Build output
 build/
-.idea/
-*.iml
+*.jar
+
+# Test server
+run/
+
+# Misc
+frame.png
+unique-vehicle-resourcepack.zip

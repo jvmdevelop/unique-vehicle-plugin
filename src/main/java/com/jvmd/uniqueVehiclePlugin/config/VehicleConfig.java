@@ -12,12 +12,13 @@ public record VehicleConfig(
         PartConfig steeringWheel,
         List<DoorPartConfig> doors,
         List<WheelPartConfig> wheels,
-        Vector3d seatOffset
+        Vector3d seatOffset,
+        PhysicsConfig physics
 ) {
 
     public record DoorPartConfig(DoorType doorType, PartConfig part) {
     }
 
-    public record WheelPartConfig(WheelType wheelType, PartConfig part) {
+    public record WheelPartConfig(WheelType wheelType, boolean front, PartConfig part) {
     }
 }

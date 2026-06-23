@@ -1,5 +1,6 @@
 package com.jvmd.uniqueVehiclePlugin.processor.impl;
 
+import com.jvmd.uniqueVehiclePlugin.config.PhysicsConfig;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.processor.Processor;
 import org.bukkit.Input;
@@ -8,8 +9,6 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public class VehicleBrakeProcessor extends Processor {
-
-    private static final double BRAKE_FORCE = 0.08;
 
     public VehicleBrakeProcessor(List<Vehicle> vehicles) {
         super(vehicles);
@@ -21,9 +20,17 @@ public class VehicleBrakeProcessor extends Processor {
         if (driver == null) return;
 
         Input input = driver.getCurrentInput();
+        PhysicsConfig physics = vehicle.getPhysics();
 
-        if (input.isBackward() && vehicle.getSpeed() > 0) {
-            vehicle.setSpeed(Math.max(vehicle.getSpeed() - BRAKE_FORCE, 0));
+        if (input.isBackward()) {
+            if (vehicle.getSpeed() > 0) {
+                // Braking while moving forward
+                vehicle.setSpeed(Math.max(vehicle.getSpeed() - physics.brakeForce(), 0));
+            } else {
+                // Reverse driving
+                double newSpeed = vehicle.getSpeed() - physics.reverseAcceleration();
+                vehicle.setSpeed(Math.max(newSpeed, -physics.reverseMaxSpeed()));
+            }
         }
     }
 }

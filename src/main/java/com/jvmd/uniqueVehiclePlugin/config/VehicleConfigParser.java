@@ -49,14 +49,36 @@ public class VehicleConfigParser {
         for (Object entry : wheelsList) {
             if (entry instanceof Map<?, ?> map) {
                 WheelType wheelType = WheelType.valueOf(((String) map.get("type")).toUpperCase());
+                boolean front = map.containsKey("front") && Boolean.parseBoolean(map.get("front").toString());
                 PartConfig part = parsePartFromMap(map);
-                wheels.add(new VehicleConfig.WheelPartConfig(wheelType, part));
+                wheels.add(new VehicleConfig.WheelPartConfig(wheelType, front, part));
             }
         }
 
-        Vector3d seatOffset = parseOffset(section.getConfigurationSection("seat.offset"));
+        Vector3d seatOffset = parseVec3(section.getConfigurationSection("seat.offset"));
 
-        return new VehicleConfig(id, frame, steeringWheel, doors, wheels, seatOffset);
+        PhysicsConfig physics = parsePhysics(section.getConfigurationSection("physics"));
+
+        return new VehicleConfig(id, frame, steeringWheel, doors, wheels, seatOffset, physics);
+    }
+
+    private PhysicsConfig parsePhysics(ConfigurationSection section) {
+        if (section == null) return PhysicsConfig.defaults();
+
+        PhysicsConfig def = PhysicsConfig.defaults();
+        return new PhysicsConfig(
+                section.getDouble("max-speed", def.maxSpeed()),
+                section.getDouble("acceleration", def.acceleration()),
+                section.getDouble("friction", def.friction()),
+                (float) section.getDouble("turn-rate", def.turnRate()),
+                section.getDouble("brake-force", def.brakeForce()),
+                section.getDouble("reverse-max-speed", def.reverseMaxSpeed()),
+                section.getDouble("reverse-acceleration", def.reverseAcceleration()),
+                section.getDouble("drift-brake-force", def.driftBrakeForce()),
+                (float) section.getDouble("drift-turn-multiplier", def.driftTurnMultiplier()),
+                section.getDouble("vehicle-width", def.vehicleWidth()),
+                section.getDouble("vehicle-length", def.vehicleLength())
+        );
     }
 
     private PartConfig parsePart(ConfigurationSection section) {
@@ -66,9 +88,10 @@ public class VehicleConfigParser {
 
         Material material = Material.valueOf(section.getString("material", "BARRIER").toUpperCase());
         int customModelData = section.getInt("custom-model-data", 0);
-        Vector3d offset = parseOffset(section.getConfigurationSection("offset"));
+        Vector3d offset = parseVec3(section.getConfigurationSection("offset"));
+        Vector3d pivot  = parseVec3(section.getConfigurationSection("pivot"));
 
-        return new PartConfig(material, customModelData, offset);
+        return new PartConfig(material, customModelData, offset, pivot);
     }
 
     @SuppressWarnings("unchecked")
@@ -77,27 +100,24 @@ public class VehicleConfigParser {
         Material material = Material.valueOf(materialObj != null ? materialObj.toString().toUpperCase() : "BARRIER");
         int customModelData = map.containsKey("custom-model-data") ? ((Number) map.get("custom-model-data")).intValue() : 0;
 
-        Vector3d offset = new Vector3d(0, 0, 0);
-        Object offsetObj = map.get("offset");
-        if (offsetObj instanceof Map<?, ?> offsetMap) {
-            offset = new Vector3d(
-                    toDouble(offsetMap.get("x")),
-                    toDouble(offsetMap.get("y")),
-                    toDouble(offsetMap.get("z"))
-            );
-        }
+        Vector3d offset = parseVec3FromMap((Map<?, ?>) map.getOrDefault("offset", null));
+        Vector3d pivot  = parseVec3FromMap((Map<?, ?>) map.getOrDefault("pivot",  null));
 
-        return new PartConfig(material, customModelData, offset);
+        return new PartConfig(material, customModelData, offset, pivot);
     }
 
-    private Vector3d parseOffset(ConfigurationSection section) {
+    private Vector3d parseVec3(ConfigurationSection section) {
         if (section == null) return new Vector3d(0, 0, 0);
-
         return new Vector3d(
                 section.getDouble("x", 0),
                 section.getDouble("y", 0),
                 section.getDouble("z", 0)
         );
+    }
+
+    private Vector3d parseVec3FromMap(Map<?, ?> map) {
+        if (map == null) return new Vector3d(0, 0, 0);
+        return new Vector3d(toDouble(map.get("x")), toDouble(map.get("y")), toDouble(map.get("z")));
     }
 
     private double toDouble(Object obj) {
