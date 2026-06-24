@@ -5,6 +5,7 @@ import com.jvmd.uniqueVehiclePlugin.entity.DoorType;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.entity.VehicleDoor;
 import com.jvmd.uniqueVehiclePlugin.processor.Processor;
+import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
 import org.bukkit.Location;
 import org.bukkit.util.Transformation;
 import org.joml.Quaternionf;
@@ -28,7 +29,7 @@ public class VehicleDoorsProcessor extends Processor {
             PartCustomization c = vehicle.getCustomization().getPart("door_" + i);
             var pivotCfg = vehicle.getConfig().doors().get(i).part().pivot();
 
-            Location loc = computePartLocation(vehicle,
+            Location loc = VehicleTransformUtil.computePartLocation(vehicle.getLocation(),
                     door.getOffset().x + c.getDeltaX(),
                     door.getOffset().y + c.getDeltaY(),
                     door.getOffset().z + c.getDeltaZ());
@@ -45,34 +46,18 @@ public class VehicleDoorsProcessor extends Processor {
             }
             Quaternionf rotation = animRot.mul(baseRot);
 
-            // For the RIGHT door the model is mirrored (scale.x < 0), so the pivot X
-            // is reflected too — negate it so translation = pivot - R(pivot) is correct.
+            Transformation t = door.getDoorModel().getTransformation();
+            Vector3f scale = new Vector3f(Math.abs(t.getScale().x), Math.abs(t.getScale().y), Math.abs(t.getScale().z));
+
             float pivotX = (float) (pivotCfg.x + c.getPivotDeltaX());
             float pivotY = (float) (pivotCfg.y + c.getPivotDeltaY());
             float pivotZ = (float) (pivotCfg.z + c.getPivotDeltaZ());
-            Vector3f pivot = door.getDoorType() == DoorType.RIGHT
-                    ? new Vector3f(-pivotX, pivotY, pivotZ)
-                    : new Vector3f( pivotX, pivotY, pivotZ);
-            Vector3f translation = new Vector3f(pivot).sub(rotation.transform(new Vector3f(pivot)));
+            Vector3f pivot = new Vector3f(pivotX, pivotY, pivotZ);
+            Vector3f translation = VehicleTransformUtil.computePivotTranslation(pivot, rotation, scale);
 
-            Transformation t = door.getDoorModel().getTransformation();
-            float sx = Math.abs(t.getScale().x);
-            float sy = t.getScale().y;
-            float sz = t.getScale().z;
-            Vector3f scale = door.getDoorType() == DoorType.RIGHT
-                    ? new Vector3f(-sx, sy, sz)
-                    : new Vector3f(sx, sy, sz);
             door.getDoorModel().setTransformation(new Transformation(
                     translation, rotation, scale, t.getRightRotation()
             ));
         }
-    }
-
-    private Location computePartLocation(Vehicle vehicle, double ox, double oy, double oz) {
-        Location base = vehicle.getLocation();
-        double rad = Math.toRadians(base.getYaw());
-        double cos = Math.cos(rad);
-        double sin = Math.sin(rad);
-        return base.clone().add(ox * cos - oz * sin, oy, ox * sin + oz * cos);
     }
 }

@@ -3,6 +3,7 @@ package com.jvmd.uniqueVehiclePlugin.processor.impl;
 import com.jvmd.uniqueVehiclePlugin.customization.PartCustomization;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.processor.Processor;
+import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
 import org.bukkit.Input;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -31,7 +32,7 @@ public class VehicleSteeringWheelProcessor extends Processor {
         var offset = vehicle.getConfig().steeringWheel().offset();
         var pivotCfg = vehicle.getConfig().steeringWheel().pivot();
 
-        Location loc = computePartLocation(vehicle,
+        Location loc = VehicleTransformUtil.computePartLocation(vehicle.getLocation(),
                 offset.x + c.getDeltaX(),
                 offset.y + c.getDeltaY(),
                 offset.z + c.getDeltaZ());
@@ -50,15 +51,16 @@ public class VehicleSteeringWheelProcessor extends Processor {
         Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
         Quaternionf rotation = new Quaternionf().rotateZ(angle).mul(baseRot);
 
+        Transformation t = vehicle.getSteeringWheel().getTransformation();
+        Vector3f scale = new Vector3f(t.getScale());
         Vector3f pivot = new Vector3f(
                 (float) (pivotCfg.x + c.getPivotDeltaX()),
                 (float) (pivotCfg.y + c.getPivotDeltaY()),
                 (float) (pivotCfg.z + c.getPivotDeltaZ()));
-        Vector3f translation = new Vector3f(pivot).sub(rotation.transform(new Vector3f(pivot)));
+        Vector3f translation = VehicleTransformUtil.computePivotTranslation(pivot, rotation, scale);
 
-        Transformation t = vehicle.getSteeringWheel().getTransformation();
         vehicle.getSteeringWheel().setTransformation(new Transformation(
-                translation, rotation, t.getScale(), t.getRightRotation()
+                translation, rotation, scale, t.getRightRotation()
         ));
 
         if (log) {
@@ -66,13 +68,5 @@ public class VehicleSteeringWheelProcessor extends Processor {
                     loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), c.getRotationYaw(),
                     pivotCfg.x, pivotCfg.y, pivotCfg.z));
         }
-    }
-
-    private Location computePartLocation(Vehicle vehicle, double ox, double oy, double oz) {
-        Location base = vehicle.getLocation();
-        double rad = Math.toRadians(base.getYaw());
-        double cos = Math.cos(rad);
-        double sin = Math.sin(rad);
-        return base.clone().add(ox * cos - oz * sin, oy, ox * sin + oz * cos);
     }
 }

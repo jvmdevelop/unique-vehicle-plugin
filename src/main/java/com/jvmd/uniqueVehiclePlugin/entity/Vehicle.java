@@ -4,6 +4,7 @@ package com.jvmd.uniqueVehiclePlugin.entity;
 import com.jvmd.uniqueVehiclePlugin.config.PhysicsConfig;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
 import com.jvmd.uniqueVehiclePlugin.customization.VehicleCustomization;
+import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
 import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -69,7 +70,7 @@ public class Vehicle {
 
         Vector3d seatOffset = config.seatOffset();
         var c = customization.getPart("seat");
-        Location seatLoc = computePartLocation(
+        Location seatLoc = VehicleTransformUtil.computePartLocation(location,
                 seatOffset.x + c.getDeltaX(),
                 seatOffset.y + c.getDeltaY(),
                 seatOffset.z + c.getDeltaZ());
@@ -92,18 +93,14 @@ public class Vehicle {
 
     private void setDisplayScale(ItemDisplay display, float scale) {
         Transformation t = display.getTransformation();
+        Vector3f currentScale = t.getScale();
         display.setTransformation(new Transformation(
                 t.getTranslation(), t.getLeftRotation(),
-                new Vector3f(scale, scale, scale),
+                new Vector3f(
+                        Math.copySign(scale, currentScale.x == 0 ? 1 : currentScale.x),
+                        Math.copySign(scale, currentScale.y == 0 ? 1 : currentScale.y),
+                        Math.copySign(scale, currentScale.z == 0 ? 1 : currentScale.z)),
                 t.getRightRotation()));
-    }
-
-    private Location computePartLocation(double ox, double oy, double oz) {
-        double rad = Math.toRadians(location.getYaw());
-        double cos = Math.cos(rad);
-        double sin = Math.sin(rad);
-
-        return location.clone().add(ox * cos - oz * sin, oy, ox * sin + oz * cos);
     }
 
     public void toggleDoors() {

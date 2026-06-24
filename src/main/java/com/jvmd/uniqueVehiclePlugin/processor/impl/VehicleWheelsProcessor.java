@@ -5,6 +5,7 @@ import com.jvmd.uniqueVehiclePlugin.customization.PartCustomization;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.entity.Wheel;
 import com.jvmd.uniqueVehiclePlugin.processor.Processor;
+import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
 import org.bukkit.Input;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -39,7 +40,7 @@ public class VehicleWheelsProcessor extends Processor {
             PartCustomization c = vehicle.getCustomization().getPart("wheel_" + i);
             PartConfig cfg = vehicle.getConfig().wheels().get(i).part();
 
-            Location loc = computePartLocation(vehicle,
+            Location loc = VehicleTransformUtil.computePartLocation(vehicle.getLocation(),
                     wheel.getOffset().x + c.getDeltaX(),
                     wheel.getOffset().y + c.getDeltaY(),
                     wheel.getOffset().z + c.getDeltaZ());
@@ -60,17 +61,19 @@ public class VehicleWheelsProcessor extends Processor {
             // Base rotation applied first (model space), then spin, then steer
             Quaternionf rotation = steerQ.mul(spinQ).mul(baseRot);
 
+            Transformation t = wheel.getModel().getTransformation();
+            Vector3f scale = new Vector3f(Math.abs(t.getScale().x), Math.abs(t.getScale().y), Math.abs(t.getScale().z));
+
             Vector3f pivot = new Vector3f(
                     (float) (cfg.pivot().x + c.getPivotDeltaX()),
                     (float) (cfg.pivot().y + c.getPivotDeltaY()),
                     (float) (cfg.pivot().z + c.getPivotDeltaZ()));
-            Vector3f translation = new Vector3f(pivot).sub(rotation.transform(new Vector3f(pivot)));
+            Vector3f translation = VehicleTransformUtil.computePivotTranslation(pivot, rotation, scale);
 
-            Transformation t = wheel.getModel().getTransformation();
             wheel.getModel().setTransformation(new Transformation(
                     translation,
                     rotation,
-                    t.getScale(),
+                    scale,
                     t.getRightRotation()
             ));
 
@@ -93,14 +96,5 @@ public class VehicleWheelsProcessor extends Processor {
     @Override
     protected void processVehicle(Vehicle vehicle) {
         processVehicle(vehicle, false);
-    }
-
-    private Location computePartLocation(Vehicle vehicle, double ox, double oy, double oz) {
-        Location base = vehicle.getLocation();
-        double rad = Math.toRadians(base.getYaw());
-        double cos = Math.cos(rad);
-        double sin = Math.sin(rad);
-
-        return base.clone().add(ox * cos - oz * sin, oy, ox * sin + oz * cos);
     }
 }
