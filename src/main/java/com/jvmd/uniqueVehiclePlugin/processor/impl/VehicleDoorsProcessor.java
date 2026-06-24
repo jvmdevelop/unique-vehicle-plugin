@@ -52,7 +52,9 @@ public class VehicleDoorsProcessor extends Processor {
             float pivotX = (float) (pivotCfg.x + c.getPivotDeltaX());
             float pivotY = (float) (pivotCfg.y + c.getPivotDeltaY());
             float pivotZ = (float) (pivotCfg.z + c.getPivotDeltaZ());
-            Vector3f pivot = new Vector3f(pivotX, pivotY, pivotZ);
+            Vector3f pivot = door.getDoorType() == DoorType.RIGHT
+                    ? new Vector3f(-pivotX, pivotY, pivotZ)
+                    : new Vector3f(pivotX, pivotY, pivotZ);
             Vector3f translation = VehicleTransformUtil.computePivotTranslation(pivot, rotation, scale);
 
             door.getDoorModel().setTransformation(new Transformation(
