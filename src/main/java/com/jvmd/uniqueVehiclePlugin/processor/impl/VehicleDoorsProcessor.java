@@ -41,7 +41,7 @@ public class VehicleDoorsProcessor extends Processor {
             Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
             Quaternionf animRot = new Quaternionf();
             if (door.isOpen()) {
-                float angle = door.getDoorType() == DoorType.LEFT ? DOOR_OPEN_ANGLE : -DOOR_OPEN_ANGLE;
+                float angle = door.getDoorType() == DoorType.LEFT ? -DOOR_OPEN_ANGLE : DOOR_OPEN_ANGLE;
                 animRot.rotateY(angle);
             }
             Quaternionf rotation = animRot.mul(baseRot);
