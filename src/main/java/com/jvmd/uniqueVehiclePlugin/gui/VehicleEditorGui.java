@@ -1,8 +1,5 @@
 package com.jvmd.uniqueVehiclePlugin.gui;
 
-import com.jvmd.uniqueVehiclePlugin.config.PartConfig;
-import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
-import com.jvmd.uniqueVehiclePlugin.customization.PartCustomization;
 import com.jvmd.uniqueVehiclePlugin.customization.VehicleDatabase;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import net.kyori.adventure.text.Component;
@@ -10,17 +7,15 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.joml.Vector3d;
+import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 import java.util.Map;
@@ -32,6 +27,7 @@ public class VehicleEditorGui implements Listener {
     private static final String TITLE = "Vehicle Editor";
     private static final int SIZE = 36;
 
+    // Row 0 — parts (position / rotation)
     private static final String[] PART_KEYS = {
         "frame", "steering_wheel", "door_0", "door_1",
         "wheel_0", "wheel_1", "wheel_2", "wheel_3", "seat"
@@ -45,99 +41,115 @@ public class VehicleEditorGui implements Listener {
         Material.MINECART, Material.MINECART, Material.MINECART, Material.MINECART, Material.SADDLE
     };
 
-    private final Map<UUID, EditSession> sessions = new ConcurrentHashMap<>();
-    private final VehicleDatabase database;
+    // Row 1 — pivots (slots 10-16; slot 9 = label, slot 17 = empty)
+    // Only parts that have a pivot point
+    private static final String[] PIVOT_KEYS = {
+        "steering_wheel", "door_0", "door_1",
+        "wheel_0", "wheel_1", "wheel_2", "wheel_3"
+    };
+    private static final String[] PIVOT_NAMES = {
+        "Pivot: Steering Wheel", "Pivot: Door Left", "Pivot: Door Right",
+        "Pivot: Wheel FL", "Pivot: Wheel FR", "Pivot: Wheel BL", "Pivot: Wheel BR"
+    };
 
-    public VehicleEditorGui(VehicleDatabase database) {
+    private final Map<UUID, GuiSession> sessions = new ConcurrentHashMap<>();
+    private final VehicleDatabase database;
+    private final VehiclePartEditor partEditor;
+    private final Plugin plugin;
+
+    public VehicleEditorGui(VehicleDatabase database, VehiclePartEditor partEditor, Plugin plugin) {
         this.database = database;
+        this.partEditor = partEditor;
+        this.plugin = plugin;
     }
 
     public void open(Player player, Vehicle vehicle) {
-        EditSession session = new EditSession(vehicle);
-        sessions.put(player.getUniqueId(), session);
-
+        sessions.put(player.getUniqueId(), new GuiSession(vehicle));
         Inventory inv = Bukkit.createInventory(null, SIZE,
                 Component.text(TITLE).decoration(TextDecoration.ITALIC, false));
-        refresh(inv, session);
+        refresh(inv, sessions.get(player.getUniqueId()));
         player.openInventory(inv);
     }
 
-    private void refresh(Inventory inv, EditSession session) {
+    private void refresh(Inventory inv, GuiSession session) {
         inv.clear();
-        int sel = session.getSelectedPartIndex();
-        String partKey = PART_KEYS[sel];
-        PartCustomization part = session.getVehicle().getCustomization().getPart(partKey);
-        float globalScale = session.getVehicle().getCustomization().getGlobalScale();
 
-        // Row 0: Part selection
+        // ── Row 0: Part buttons (position/rotation editing) ──────────────────
         for (int i = 0; i < 9; i++) {
             ItemStack item = new ItemStack(PART_MATERIALS[i]);
             ItemMeta meta = item.getItemMeta();
-            boolean selected = i == sel;
-            meta.displayName(Component.text(PART_NAMES[i],
-                    selected ? NamedTextColor.GREEN : NamedTextColor.YELLOW)
+            meta.displayName(Component.text(PART_NAMES[i], NamedTextColor.YELLOW)
                     .decoration(TextDecoration.ITALIC, false));
-            if (selected) {
-                meta.addEnchant(Enchantment.UNBREAKING, 1, true);
-                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            }
+            meta.lore(List.of(
+                    Component.text("Click to edit position / rotation", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false)
+            ));
             item.setItemMeta(meta);
             inv.setItem(i, item);
         }
 
-        // Row 1: Offset X Y Z adjustment
-        inv.setItem(9,  makeButton(Material.RED_STAINED_GLASS_PANE,   "X ← (Shift: -0.5)", NamedTextColor.RED));
-        inv.setItem(10, makeValue("X: " + fmt(part.getDeltaX()), NamedTextColor.WHITE, "Left-click: ±0.0625  |  Shift: ±0.5"));
-        inv.setItem(11, makeButton(Material.GREEN_STAINED_GLASS_PANE,  "X → (Shift: +0.5)", NamedTextColor.GREEN));
-        inv.setItem(12, makeButton(Material.RED_STAINED_GLASS_PANE,   "Y ← (Shift: -0.5)", NamedTextColor.RED));
-        inv.setItem(13, makeValue("Y: " + fmt(part.getDeltaY()), NamedTextColor.WHITE, "Left-click: ±0.0625  |  Shift: ±0.5"));
-        inv.setItem(14, makeButton(Material.GREEN_STAINED_GLASS_PANE,  "Y → (Shift: +0.5)", NamedTextColor.GREEN));
-        inv.setItem(15, makeButton(Material.RED_STAINED_GLASS_PANE,   "Z ← (Shift: -0.5)", NamedTextColor.RED));
-        inv.setItem(16, makeValue("Z: " + fmt(part.getDeltaZ()), NamedTextColor.WHITE, "Left-click: ±0.0625  |  Shift: ±0.5"));
-        inv.setItem(17, makeButton(Material.GREEN_STAINED_GLASS_PANE,  "Z → (Shift: +0.5)", NamedTextColor.GREEN));
+        // ── Row 1: Pivot buttons ──────────────────────────────────────────────
+        // Slot 9 = section label
+        inv.setItem(9, makeLabel("— Pivots —", NamedTextColor.LIGHT_PURPLE,
+                "Click to edit the pivot (rotation center) of a part"));
 
-        // Row 2: Read-only pivot info from config
-        Vector3d pivot = getConfigPivot(session.getVehicle(), sel);
-        if (pivot != null) {
-            inv.setItem(18, makeInfo("Pivot X: " + fmt(pivot.x), NamedTextColor.AQUA, "Configured in config.yml"));
-            inv.setItem(19, makeInfo("Pivot Y: " + fmt(pivot.y), NamedTextColor.AQUA, "Configured in config.yml"));
-            inv.setItem(20, makeInfo("Pivot Z: " + fmt(pivot.z), NamedTextColor.AQUA, "Configured in config.yml"));
-            for (int i = 21; i <= 26; i++)
-                inv.setItem(i, makeButton(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.GRAY));
-        } else {
-            for (int i = 18; i <= 26; i++)
-                inv.setItem(i, makeButton(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.GRAY));
+        // Slots 10-16: one button per pivot-capable part
+        for (int i = 0; i < PIVOT_KEYS.length; i++) {
+            ItemStack item = new ItemStack(Material.GLOWSTONE_DUST);
+            ItemMeta meta = item.getItemMeta();
+            meta.displayName(Component.text(PIVOT_NAMES[i], NamedTextColor.LIGHT_PURPLE)
+                    .decoration(TextDecoration.ITALIC, false));
+            meta.lore(List.of(
+                    Component.text("Click to edit pivot point", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false),
+                    Component.text("Pivot highlighted with particles", NamedTextColor.DARK_PURPLE)
+                            .decoration(TextDecoration.ITALIC, false)
+            ));
+            item.setItemMeta(meta);
+            inv.setItem(10 + i, item); // slots 10-16
         }
 
-        // Row 3: Scale + controls
-        inv.setItem(27, makeButton(Material.RED_STAINED_GLASS_PANE,  "Scale ← (Shift: -0.5)", NamedTextColor.RED));
-        inv.setItem(28, makeValue("Scale: " + String.format("%.2f", globalScale), NamedTextColor.YELLOW, "Range: 0.1 - 5.0  |  Shift: ±0.5"));
-        inv.setItem(29, makeButton(Material.GREEN_STAINED_GLASS_PANE, "Scale → (Shift: +0.5)", NamedTextColor.GREEN));
-        for (int i = 30; i <= 32; i++)
-            inv.setItem(i, makeButton(Material.BLACK_STAINED_GLASS_PANE, " ", NamedTextColor.BLACK));
-        inv.setItem(33, makeButton(Material.YELLOW_CONCRETE, "Reset Part",  NamedTextColor.YELLOW));
-        inv.setItem(34, makeButton(Material.RED_CONCRETE,    "Cancel",      NamedTextColor.RED));
-        inv.setItem(35, makeButton(Material.LIME_CONCRETE,   "Save",        NamedTextColor.GREEN));
-    }
+        inv.setItem(17, makeButton(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.GRAY));
 
-    private Vector3d getConfigPivot(Vehicle vehicle, int partIndex) {
-        VehicleConfig cfg = vehicle.getConfig();
-        return switch (partIndex) {
-            case 1 -> cfg.steeringWheel().pivot();
-            case 2 -> cfg.doors().size() > 0 ? cfg.doors().get(0).part().pivot() : null;
-            case 3 -> cfg.doors().size() > 1 ? cfg.doors().get(1).part().pivot() : null;
-            case 4 -> cfg.wheels().size() > 0 ? cfg.wheels().get(0).part().pivot() : null;
-            case 5 -> cfg.wheels().size() > 1 ? cfg.wheels().get(1).part().pivot() : null;
-            case 6 -> cfg.wheels().size() > 2 ? cfg.wheels().get(2).part().pivot() : null;
-            case 7 -> cfg.wheels().size() > 3 ? cfg.wheels().get(3).part().pivot() : null;
-            default -> null;
-        };
+        // ── Row 2: Scale + actions ────────────────────────────────────────────
+        inv.setItem(18, makeButton(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.GRAY));
+        inv.setItem(19, makeButton(Material.RED_STAINED_GLASS_PANE,   "Scale −", NamedTextColor.RED));
+        inv.setItem(20, makeValue("Scale: " + String.format("%.2f",
+                session.vehicle.getCustomization().getGlobalScale()),
+                NamedTextColor.YELLOW, "Click ±0.1  |  Shift ±0.5"));
+        inv.setItem(21, makeButton(Material.GREEN_STAINED_GLASS_PANE,  "Scale +", NamedTextColor.GREEN));
+        inv.setItem(22, makeButton(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.GRAY));
+        inv.setItem(23, makeButton(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.GRAY));
+        inv.setItem(24, makeButton(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.GRAY));
+        inv.setItem(25, makeButton(Material.YELLOW_CONCRETE,  "Reset All Offsets", NamedTextColor.YELLOW));
+        inv.setItem(26, makeButton(Material.RED_CONCRETE,     "Close",             NamedTextColor.RED));
+
+        // ── Row 3: Controls hint ──────────────────────────────────────────────
+        for (int i = 27; i <= 35; i++)
+            inv.setItem(i, makeButton(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.GRAY));
+
+        ItemStack hintItem = new ItemStack(Material.PAPER);
+        ItemMeta hintMeta = hintItem.getItemMeta();
+        hintMeta.displayName(Component.text("Controls", NamedTextColor.AQUA)
+                .decoration(TextDecoration.ITALIC, false));
+        hintMeta.lore(List.of(
+                Component.text("WASD → move XZ",                                     NamedTextColor.GRAY)  .decoration(TextDecoration.ITALIC, false),
+                Component.text("Ctrl + W/S → move Y",                               NamedTextColor.GRAY)  .decoration(TextDecoration.ITALIC, false),
+                Component.text("Space + A/D → rotate part",                         NamedTextColor.GRAY)  .decoration(TextDecoration.ITALIC, false),
+                Component.text("Sprint + Space → toggle PIVOT / POSITION mode",     NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false),
+                Component.text("  pivot mode: WASD = pivot XZ, Ctrl+WS = pivot Y", NamedTextColor.DARK_PURPLE) .decoration(TextDecoration.ITALIC, false),
+                Component.text("Stick ← / → → orbit left/right (right-click)",     NamedTextColor.AQUA)  .decoration(TextDecoration.ITALIC, false),
+                Component.text("Stick ← / → → orbit up/down (left-click)",         NamedTextColor.AQUA)  .decoration(TextDecoration.ITALIC, false),
+                Component.text("Sneak → dismount & save",                           NamedTextColor.GRAY)  .decoration(TextDecoration.ITALIC, false)
+        ));
+        hintItem.setItemMeta(hintMeta);
+        inv.setItem(31, hintItem);
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        EditSession session = sessions.get(player.getUniqueId());
+        GuiSession session = sessions.get(player.getUniqueId());
         if (session == null) return;
 
         Component title = event.getView().title();
@@ -149,70 +161,76 @@ public class VehicleEditorGui implements Listener {
         if (slot < 0 || slot >= SIZE) return;
 
         boolean shift = event.isShiftClick();
-        handleClick(player, session, slot, shift);
-        refresh(player.getOpenInventory().getTopInventory(), session);
-    }
+        Vehicle vehicle = session.vehicle;
 
-    private void handleClick(Player player, EditSession session, int slot, boolean shift) {
-        if (slot <= 8) {
-            session.setSelectedPartIndex(slot);
+        // Row 0 (0-8): part → POSITION mode editor
+        if (slot < 9) {
+            String partKey = PART_KEYS[slot];
+            sessions.remove(player.getUniqueId());
+            player.closeInventory();
+            Bukkit.getScheduler().runTaskLater(plugin, () ->
+                    partEditor.startSession(player, vehicle, partKey), 1L);
             return;
         }
 
-        String partKey = PART_KEYS[session.getSelectedPartIndex()];
-        PartCustomization part = session.getVehicle().getCustomization().getPart(partKey);
-        double step = shift ? 0.5 : 0.0625;
+        // Row 1 (10-16): pivot → PIVOT mode editor
+        if (slot >= 10 && slot <= 16) {
+            int idx = slot - 10;
+            String partKey = PIVOT_KEYS[idx];
+            sessions.remove(player.getUniqueId());
+            player.closeInventory();
+            Bukkit.getScheduler().runTaskLater(plugin, () ->
+                    partEditor.startSessionInPivotMode(player, vehicle, partKey), 1L);
+            return;
+        }
 
+        // Row 2: scale / reset / close
         switch (slot) {
-            case 9  -> part.setDeltaX(part.getDeltaX() - step);
-            case 11 -> part.setDeltaX(part.getDeltaX() + step);
-            case 12 -> part.setDeltaY(part.getDeltaY() - step);
-            case 14 -> part.setDeltaY(part.getDeltaY() + step);
-            case 15 -> part.setDeltaZ(part.getDeltaZ() - step);
-            case 17 -> part.setDeltaZ(part.getDeltaZ() + step);
-            case 27 -> adjustScale(session, shift ? -0.5f : -0.1f, player);
-            case 29 -> adjustScale(session, shift ? 0.5f  :  0.1f, player);
-            case 33 -> {
-                session.getVehicle().getCustomization().resetPart(partKey);
-                player.sendActionBar(Component.text("Part reset", NamedTextColor.YELLOW)
-                        .decoration(TextDecoration.ITALIC, false));
-            }
-            case 34 -> {
-                sessions.remove(player.getUniqueId());
-                session.revert();
-                player.closeInventory();
-                player.sendMessage(Component.text("Edit cancelled.", NamedTextColor.RED));
-            }
-            case 35 -> {
-                sessions.remove(player.getUniqueId());
-                database.save(session.getVehicle().getCustomization());
-                player.closeInventory();
-                player.sendMessage(Component.text("Vehicle customization saved!", NamedTextColor.GREEN));
-            }
+            case 19 -> { adjustScale(session, player, shift ? -0.5f : -0.1f); refresh(player.getOpenInventory().getTopInventory(), session); }
+            case 21 -> { adjustScale(session, player, shift ?  0.5f :  0.1f); refresh(player.getOpenInventory().getTopInventory(), session); }
+            case 25 -> { resetAllOffsets(session, player); refresh(player.getOpenInventory().getTopInventory(), session); }
+            case 26 -> { sessions.remove(player.getUniqueId()); player.closeInventory(); }
         }
     }
 
-    private void adjustScale(EditSession session, float delta, Player player) {
-        float current = session.getVehicle().getCustomization().getGlobalScale();
-        float next = Math.max(0.1f, Math.min(5.0f, current + delta));
-        session.getVehicle().applyGlobalScale(next);
+    private void adjustScale(GuiSession session, Player player, float delta) {
+        float next = Math.max(0.1f, Math.min(5.0f, session.vehicle.getCustomization().getGlobalScale() + delta));
+        session.vehicle.applyGlobalScale(next);
+        database.save(session.vehicle.getCustomization());
         player.sendActionBar(Component.text("Scale: " + String.format("%.2f", next), NamedTextColor.YELLOW)
+                .decoration(TextDecoration.ITALIC, false));
+    }
+
+    private void resetAllOffsets(GuiSession session, Player player) {
+        for (String key : PART_KEYS)
+            session.vehicle.getCustomization().resetPart(key);
+        database.save(session.vehicle.getCustomization());
+        player.sendActionBar(Component.text("All offsets reset.", NamedTextColor.YELLOW)
                 .decoration(TextDecoration.ITALIC, false));
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player player)) return;
-        EditSession session = sessions.remove(player.getUniqueId());
-        if (session == null) return;
-        session.revert();
-        player.sendMessage(Component.text("Edit cancelled.", NamedTextColor.RED));
+        GuiSession session = sessions.remove(player.getUniqueId());
+        if (session != null) database.save(session.vehicle.getCustomization());
     }
 
-    private ItemStack makeButton(Material material, String name, NamedTextColor color) {
-        ItemStack item = new ItemStack(material);
+    // ── Item helpers ──────────────────────────────────────────────────────────
+
+    private ItemStack makeButton(Material mat, String name, NamedTextColor color) {
+        ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text(name, color).decoration(TextDecoration.ITALIC, false));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private ItemStack makeLabel(String name, NamedTextColor color, String lore) {
+        ItemStack item = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text(name, color).decoration(TextDecoration.ITALIC, false));
+        meta.lore(List.of(Component.text(lore, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
         item.setItemMeta(meta);
         return item;
     }
@@ -226,16 +244,8 @@ public class VehicleEditorGui implements Listener {
         return item;
     }
 
-    private ItemStack makeInfo(String name, NamedTextColor color, String lore) {
-        ItemStack item = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text(name, color).decoration(TextDecoration.ITALIC, false));
-        meta.lore(List.of(Component.text(lore, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    private String fmt(double value) {
-        return String.format("%.4f", value);
+    private static class GuiSession {
+        final Vehicle vehicle;
+        GuiSession(Vehicle vehicle) { this.vehicle = vehicle; }
     }
 }

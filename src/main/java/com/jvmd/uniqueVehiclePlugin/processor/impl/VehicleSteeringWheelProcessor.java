@@ -22,6 +22,11 @@ public class VehicleSteeringWheelProcessor extends Processor {
 
     @Override
     protected void processVehicle(Vehicle vehicle) {
+        processVehicle(vehicle, false);
+    }
+
+    @Override
+    protected void processVehicle(Vehicle vehicle, boolean log) {
         PartCustomization c = vehicle.getCustomization().getPart("steering_wheel");
         var offset = vehicle.getConfig().steeringWheel().offset();
         var pivotCfg = vehicle.getConfig().steeringWheel().pivot();
@@ -42,15 +47,25 @@ public class VehicleSteeringWheelProcessor extends Processor {
             if (input.isRight()) angle = -STEER_ANGLE;
         }
 
-        Quaternionf rotation = new Quaternionf().rotateZ(angle);
+        Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
+        Quaternionf rotation = new Quaternionf().rotateZ(angle).mul(baseRot);
 
-        Vector3f pivot = new Vector3f((float) pivotCfg.x, (float) pivotCfg.y, (float) pivotCfg.z);
+        Vector3f pivot = new Vector3f(
+                (float) (pivotCfg.x + c.getPivotDeltaX()),
+                (float) (pivotCfg.y + c.getPivotDeltaY()),
+                (float) (pivotCfg.z + c.getPivotDeltaZ()));
         Vector3f translation = new Vector3f(pivot).sub(rotation.transform(new Vector3f(pivot)));
 
         Transformation t = vehicle.getSteeringWheel().getTransformation();
         vehicle.getSteeringWheel().setTransformation(new Transformation(
                 translation, rotation, t.getScale(), t.getRightRotation()
         ));
+
+        if (log) {
+            LOGGER.info(String.format("[Parts] steering_wheel -> x=%.3f y=%.3f z=%.3f yaw=%.1f rot=%.1f | pivot=(%.4f,%.4f,%.4f)",
+                    loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), c.getRotationYaw(),
+                    pivotCfg.x, pivotCfg.y, pivotCfg.z));
+        }
     }
 
     private Location computePartLocation(Vehicle vehicle, double ox, double oy, double oz) {

@@ -54,6 +54,7 @@ public class VehicleListener implements Listener {
 
         vehicle.setSpeed(0);
         vehicle.setDrifting(false);
+        vehicle.toggleDoors();
     }
 
     @EventHandler

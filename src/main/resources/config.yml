@@ -4,54 +4,54 @@ vehicles:
       material: BARRIER
       custom-model-data: 1
       offset:
-        x: 1.125
-        y: 0
-        z: 1.625
+        x: -0.4375
+        y: 0.25
+        z: 0.125
     steering-wheel:
       material: BARRIER
       custom-model-data: 2
       offset:
-        x: 0.5
-        y: 0.5
-        z: 0.5
+        x: 0.125
+        y: 0.75
+        z: 1.75
       pivot:
-        x: -0.0313
-        y: 0.4375
-        z: 0.375
+        x: 0.0313
+        y: 0.0625
+        z: 0.0
     doors:
       - type: LEFT
         material: BARRIER
         custom-model-data: 3
         offset:
-          x: 0.5
-          y: 0.5
-          z: 0.5
+          x: 0.6875
+          y: 0.875
+          z: 1.125
         pivot:
-          x: 0.5625
-          y: 0.4375
-          z: 0.5
+          x: 0.0
+          y: 0.0
+          z: 0.0
       - type: RIGHT
         material: BARRIER
         custom-model-data: 3
         offset:
-          x: 0.5
-          y: 0.5
-          z: 0.5
+          x: -0.6875
+          y: 0.875
+          z: 1.125
         pivot:
-          x: -0.5625
-          y: 0.4375
-          z: 0.5
+          x: 0.0
+          y: 0.0
+          z: 0.0
     wheels:
       - type: LEFT
         front: true
         material: BARRIER
         custom-model-data: 4
         offset:
-          x: 1.125
-          y: 0.1875
-          z: 1.425
+          x: 0.6875
+          y: 0.4375
+          z: 1.375
         pivot:
-          x: 0.0586
+          x: 0.0625
           y: 0
           z: 0
       - type: RIGHT
@@ -59,11 +59,11 @@ vehicles:
         material: BARRIER
         custom-model-data: 4
         offset:
-          x: -1.125
-          y: 0.1875
-          z: 1.425
+          x: -0.6875
+          y: 0.4375
+          z: 1.375
         pivot:
-          x: -0.0586
+          x: 0.0625
           y: 0
           z: 0
       - type: LEFT
@@ -71,30 +71,30 @@ vehicles:
         material: BARRIER
         custom-model-data: 4
         offset:
-          x: 1.125
-          y: 0.1875
-          z: 1.425
+          x: 0.6875
+          y: 0.4375
+          z: 0.0
         pivot:
-          x: 0.0586
+          x: 0.0625
           y: 0
-          z: -1.875
+          z: 0
       - type: RIGHT
         front: false
         material: BARRIER
         custom-model-data: 4
         offset:
-          x: -1.125
-          y: 0.1875
-          z: 1.425
+          x: -0.6875
+          y: 0.4375
+          z: 0.0
         pivot:
-          x: -0.0586
+          x: 0.0625
           y: 0
-          z: -1.875
+          z: 0
     seat:
       offset:
-        x: 0.5
+        x: 0.2375
         y: 0.5
-        z: 0.5
+        z: 1.5
     physics:
       max-speed: 1.2
       acceleration: 0.05

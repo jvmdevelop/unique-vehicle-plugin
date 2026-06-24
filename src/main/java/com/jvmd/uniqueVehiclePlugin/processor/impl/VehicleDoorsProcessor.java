@@ -36,18 +36,34 @@ public class VehicleDoorsProcessor extends Processor {
 
             door.getDoorModel().teleport(loc);
 
-            Quaternionf rotation = new Quaternionf();
+            // Base rotation from rotationYaw, then animation on top
+            Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
+            Quaternionf animRot = new Quaternionf();
             if (door.isOpen()) {
                 float angle = door.getDoorType() == DoorType.LEFT ? DOOR_OPEN_ANGLE : -DOOR_OPEN_ANGLE;
-                rotation.rotateY(angle);
+                animRot.rotateY(angle);
             }
+            Quaternionf rotation = animRot.mul(baseRot);
 
-            Vector3f pivot = new Vector3f((float) pivotCfg.x, (float) pivotCfg.y, (float) pivotCfg.z);
+            // For the RIGHT door the model is mirrored (scale.x < 0), so the pivot X
+            // is reflected too — negate it so translation = pivot - R(pivot) is correct.
+            float pivotX = (float) (pivotCfg.x + c.getPivotDeltaX());
+            float pivotY = (float) (pivotCfg.y + c.getPivotDeltaY());
+            float pivotZ = (float) (pivotCfg.z + c.getPivotDeltaZ());
+            Vector3f pivot = door.getDoorType() == DoorType.RIGHT
+                    ? new Vector3f(-pivotX, pivotY, pivotZ)
+                    : new Vector3f( pivotX, pivotY, pivotZ);
             Vector3f translation = new Vector3f(pivot).sub(rotation.transform(new Vector3f(pivot)));
 
             Transformation t = door.getDoorModel().getTransformation();
+            float sx = Math.abs(t.getScale().x);
+            float sy = t.getScale().y;
+            float sz = t.getScale().z;
+            Vector3f scale = door.getDoorType() == DoorType.RIGHT
+                    ? new Vector3f(-sx, sy, sz)
+                    : new Vector3f(sx, sy, sz);
             door.getDoorModel().setTransformation(new Transformation(
-                    translation, rotation, t.getScale(), t.getRightRotation()
+                    translation, rotation, scale, t.getRightRotation()
             ));
         }
     }

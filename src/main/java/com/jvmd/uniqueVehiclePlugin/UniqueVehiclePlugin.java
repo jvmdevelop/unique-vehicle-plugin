@@ -6,6 +6,7 @@ import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfigParser;
 import com.jvmd.uniqueVehiclePlugin.customization.VehicleDatabase;
 import com.jvmd.uniqueVehiclePlugin.gui.VehicleEditorGui;
+import com.jvmd.uniqueVehiclePlugin.gui.VehiclePartEditor;
 import com.jvmd.uniqueVehiclePlugin.listener.VehicleListener;
 import com.jvmd.uniqueVehiclePlugin.resourcepack.ResourcePackListener;
 import com.jvmd.uniqueVehiclePlugin.resourcepack.ResourcePackServer;
@@ -70,17 +71,19 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
         VehicleListener listener = new VehicleListener(registry, physicsProcessor);
         registry.setOnRemoveCallback(listener::onVehicleRemoved);
 
-        VehicleEditorGui editorGui = new VehicleEditorGui(database);
+        VehiclePartEditor partEditor = new VehiclePartEditor(database, this);
+        VehicleEditorGui editorGui = new VehicleEditorGui(database, partEditor, this);
 
-        VehicleTickTask tickTask = new VehicleTickTask(movingManager, bodyManager, registry);
+        VehicleTickTask tickTask = new VehicleTickTask(movingManager, bodyManager, registry, partEditor);
         tickTask.runTaskTimer(this, 0L, 1L);
 
-        VehicleCommand command = new VehicleCommand(vehicleConfigs, assembler, registry, database, editorGui);
+        VehicleCommand command = new VehicleCommand(vehicleConfigs, assembler, registry, database, editorGui, this);
         getCommand("vehicle").setExecutor(command);
         getCommand("vehicle").setTabCompleter(command);
 
         getServer().getPluginManager().registerEvents(listener, this);
         getServer().getPluginManager().registerEvents(editorGui, this);
+        getServer().getPluginManager().registerEvents(partEditor, this);
 
         // Start resource pack HTTP server
         File zipFile = new File(getServer().getWorldContainer(), "unique-vehicle-resourcepack.zip");

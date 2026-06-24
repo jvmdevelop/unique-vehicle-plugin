@@ -16,7 +16,7 @@ import java.util.List;
 
 public class VehicleWheelsProcessor extends Processor {
 
-    private static final float SPIN_RATE = 0.5f;
+    private static final float SPIN_RATE = 2.27f;
     private static final float STEER_ANGLE = (float) Math.toRadians(25);
 
     public VehicleWheelsProcessor(List<Vehicle> vehicles) {
@@ -24,7 +24,7 @@ public class VehicleWheelsProcessor extends Processor {
     }
 
     @Override
-    protected void processVehicle(Vehicle vehicle) {
+    protected void processVehicle(Vehicle vehicle, boolean log) {
         float steerAngle = 0;
         Player driver = vehicle.getDriver();
         if (driver != null) {
@@ -51,17 +51,19 @@ public class VehicleWheelsProcessor extends Processor {
             spin = spin % ((float) Math.PI * 2);
             wheel.setSpinAngle(spin);
 
-            // Steer (Y axis) then spin (X axis = wheel axle)
-            Quaternionf rotation = new Quaternionf();
+            Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
+            Quaternionf spinQ = new Quaternionf().rotateX(spin);
+            Quaternionf steerQ = new Quaternionf();
             if (wheel.isFront() && steerAngle != 0) {
-                rotation.rotateY(steerAngle);
+                steerQ.rotateY(steerAngle);
             }
-            rotation.rotateX(spin);
+            // Base rotation applied first (model space), then spin, then steer
+            Quaternionf rotation = steerQ.mul(spinQ).mul(baseRot);
 
             Vector3f pivot = new Vector3f(
-                    (float) cfg.pivot().x,
-                    (float) cfg.pivot().y,
-                    (float) cfg.pivot().z);
+                    (float) (cfg.pivot().x + c.getPivotDeltaX()),
+                    (float) (cfg.pivot().y + c.getPivotDeltaY()),
+                    (float) (cfg.pivot().z + c.getPivotDeltaZ()));
             Vector3f translation = new Vector3f(pivot).sub(rotation.transform(new Vector3f(pivot)));
 
             Transformation t = wheel.getModel().getTransformation();
@@ -71,7 +73,26 @@ public class VehicleWheelsProcessor extends Processor {
                     t.getScale(),
                     t.getRightRotation()
             ));
+
+            if (log) {
+                Vector3f angles = rotation.getEulerAnglesXYZ(new Vector3f());
+                LOGGER.info(String.format(
+                        "[Wheels] wheel_%d (%s %s) | spin=%.3f steer=%.3f rot=%.1f | rotation(XYZ)=(%.3f, %.3f, %.3f) | pivot=(%.4f,%.4f,%.4f) | translation=(%.4f,%.4f,%.4f)",
+                        i,
+                        wheel.isFront() ? "front" : "rear",
+                        wheel.getWheelType(),
+                        spin, steerAngle, c.getRotationYaw(),
+                        angles.x, angles.y, angles.z,
+                        pivot.x, pivot.y, pivot.z,
+                        translation.x, translation.y, translation.z
+                ));
+            }
         }
+    }
+
+    @Override
+    protected void processVehicle(Vehicle vehicle) {
+        processVehicle(vehicle, false);
     }
 
     private Location computePartLocation(Vehicle vehicle, double ox, double oy, double oz) {
