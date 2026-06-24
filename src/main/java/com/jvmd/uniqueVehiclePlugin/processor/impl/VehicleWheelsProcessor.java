@@ -58,17 +58,12 @@ public class VehicleWheelsProcessor extends Processor {
             if (wheel.isFront() && steerAngle != 0) {
                 steerQ.rotateY(steerAngle);
             }
-            // Base rotation applied first (model space), then spin, then steer
-            Quaternionf rotation = steerQ.mul(spinQ).mul(baseRot);
+            // Apply wheel-local motion before vehicle yaw so the axle stays fixed.
+            Quaternionf rotation = new Quaternionf(baseRot).mul(steerQ).mul(spinQ);
 
             Transformation t = wheel.getModel().getTransformation();
             Vector3f scale = new Vector3f(Math.abs(t.getScale().x), Math.abs(t.getScale().y), Math.abs(t.getScale().z));
-
-            Vector3f pivot = new Vector3f(
-                    (float) (cfg.pivot().x + c.getPivotDeltaX()),
-                    (float) (cfg.pivot().y + c.getPivotDeltaY()),
-                    (float) (cfg.pivot().z + c.getPivotDeltaZ()));
-            Vector3f translation = VehicleTransformUtil.computePivotTranslation(pivot, rotation, scale);
+            Vector3f translation = new Vector3f(0, 0, 0);
 
             wheel.getModel().setTransformation(new Transformation(
                     translation,
@@ -80,13 +75,12 @@ public class VehicleWheelsProcessor extends Processor {
             if (log) {
                 Vector3f angles = rotation.getEulerAnglesXYZ(new Vector3f());
                 LOGGER.info(String.format(
-                        "[Wheels] wheel_%d (%s %s) | spin=%.3f steer=%.3f rot=%.1f | rotation(XYZ)=(%.3f, %.3f, %.3f) | pivot=(%.4f,%.4f,%.4f) | translation=(%.4f,%.4f,%.4f)",
+                        "[Wheels] wheel_%d (%s %s) | spin=%.3f steer=%.3f rot=%.1f | rotation(XYZ)=(%.3f, %.3f, %.3f) | translation=(%.4f,%.4f,%.4f)",
                         i,
                         wheel.isFront() ? "front" : "rear",
                         wheel.getWheelType(),
                         spin, steerAngle, c.getRotationYaw(),
                         angles.x, angles.y, angles.z,
-                        pivot.x, pivot.y, pivot.z,
                         translation.x, translation.y, translation.z
                 ));
             }
