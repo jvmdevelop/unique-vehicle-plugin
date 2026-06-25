@@ -10,7 +10,7 @@ depend:
 commands:
   vehicle:
     description: Manage vehicles
-    usage: /vehicle <spawn|remove|list|edit>
+    usage: /vehicle <spawn|remove|list>
     permission: uniquevehicle.use
 
 permissions:

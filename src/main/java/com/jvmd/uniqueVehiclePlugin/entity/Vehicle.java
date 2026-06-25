@@ -34,6 +34,7 @@ public class Vehicle {
     private double speed;
     private boolean drifting;
     private UUID driverId;
+    private float steeringAngle;
 
     public Vehicle(VehicleConfig config, VehicleFrame frame, ItemDisplay steeringWheel, VehicleDoor[] doors, Wheel[] wheels, Entity seat, Interaction hitbox, Location location, VehicleCustomization customization) {
         this.config = config;
@@ -218,6 +219,14 @@ public class Vehicle {
 
     public void setDrifting(boolean drifting) {
         this.drifting = drifting;
+    }
+
+    public float getSteeringAngle() {
+        return steeringAngle;
+    }
+
+    public void setSteeringAngle(float steeringAngle) {
+        this.steeringAngle = steeringAngle;
     }
 
 }

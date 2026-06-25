@@ -89,9 +89,8 @@ public class VehicleConfigParser {
         Material material = Material.valueOf(section.getString("material", "BARRIER").toUpperCase());
         int customModelData = section.getInt("custom-model-data", 0);
         Vector3d offset = parseVec3(section.getConfigurationSection("offset"));
-        Vector3d pivot  = parseVec3(section.getConfigurationSection("pivot"));
 
-        return new PartConfig(material, customModelData, offset, pivot);
+        return new PartConfig(material, customModelData, offset);
     }
 
     @SuppressWarnings("unchecked")
@@ -101,9 +100,8 @@ public class VehicleConfigParser {
         int customModelData = map.containsKey("custom-model-data") ? ((Number) map.get("custom-model-data")).intValue() : 0;
 
         Vector3d offset = parseVec3FromMap((Map<?, ?>) map.getOrDefault("offset", null));
-        Vector3d pivot  = parseVec3FromMap((Map<?, ?>) map.getOrDefault("pivot",  null));
 
-        return new PartConfig(material, customModelData, offset, pivot);
+        return new PartConfig(material, customModelData, offset);
     }
 
     private Vector3d parseVec3(ConfigurationSection section) {

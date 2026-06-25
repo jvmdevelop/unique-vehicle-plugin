@@ -33,11 +33,8 @@ public class VehicleDatabase {
                     global_scale REAL NOT NULL DEFAULT 1
                 )
             """);
-            // Migrate: add new columns if they don't exist yet
+            // Migrate: add rotation column if it doesn't exist yet.
             for (String col : new String[]{
-                    "pivot_delta_x REAL NOT NULL DEFAULT 0",
-                    "pivot_delta_y REAL NOT NULL DEFAULT 0",
-                    "pivot_delta_z REAL NOT NULL DEFAULT 0",
                     "rotation_yaw REAL NOT NULL DEFAULT 0"
             }) {
                 try (Statement s = connection.createStatement()) {
@@ -71,9 +68,6 @@ public class VehicleDatabase {
                     part.setDeltaY(rs.getDouble("delta_y"));
                     part.setDeltaZ(rs.getDouble("delta_z"));
                     part.setScale(rs.getFloat("scale"));
-                    part.setPivotDeltaX(rs.getDouble("pivot_delta_x"));
-                    part.setPivotDeltaY(rs.getDouble("pivot_delta_y"));
-                    part.setPivotDeltaZ(rs.getDouble("pivot_delta_z"));
                     part.setRotationYaw(rs.getDouble("rotation_yaw"));
                 }
             }
@@ -97,9 +91,8 @@ public class VehicleDatabase {
                 PartCustomization part = entry.getValue();
                 try (PreparedStatement ps = connection.prepareStatement("""
                     INSERT OR REPLACE INTO vehicle_customizations
-                    (vehicle_id, part_key, delta_x, delta_y, delta_z, scale,
-                     pivot_delta_x, pivot_delta_y, pivot_delta_z, rotation_yaw)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (vehicle_id, part_key, delta_x, delta_y, delta_z, scale, rotation_yaw)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                 """)) {
                     ps.setString(1, custom.getVehicleId());
                     ps.setString(2, entry.getKey());
@@ -107,10 +100,7 @@ public class VehicleDatabase {
                     ps.setDouble(4, part.getDeltaY());
                     ps.setDouble(5, part.getDeltaZ());
                     ps.setFloat(6, part.getScale());
-                    ps.setDouble(7, part.getPivotDeltaX());
-                    ps.setDouble(8, part.getPivotDeltaY());
-                    ps.setDouble(9, part.getPivotDeltaZ());
-                    ps.setDouble(10, part.getRotationYaw());
+                    ps.setDouble(7, part.getRotationYaw());
                     ps.executeUpdate();
                 }
             }

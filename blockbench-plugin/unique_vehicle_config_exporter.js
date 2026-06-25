@@ -16,15 +16,15 @@
  *                       If wheel_1 is missing, wheel_0 is reused for rear.
  *      seat           — player seat position
  *
- * 3. For rotating parts (wheels, doors, steering_wheel):
- *    Set the Pivot Point of ANY cube inside the group to the rotation centre
- *    (axle, hinge, steering joint).  All cubes in the group must share the same
- *    Pivot Point — Blockbench sets this automatically when you use
- *    "Edit > Set Pivot" or drag the pivot handle.
+ * 3. For rotating parts, model the geometry around the group's origin:
+ *      steering_wheel origin = center of the steering wheel
+ *      door origin           = hinge line
+ *      wheel origin          = axle center
  *
  *    The plugin reads:
- *      • group.origin / 16                → entity placement offset
- *      • (first_cube.pivot - group.origin) / 16  → rotation pivot in model space
+ *      • group.origin / 16 → entity placement offset
+ *    Runtime rotations happen around the ItemDisplay origin. No pivot offsets
+ *    are exported or applied.
  *
  * 4. wheel_0 generates BOTH front-left and front-right entries.
  *    Front-right X is mirrored: x_right = -x_left.
@@ -52,29 +52,8 @@
     function px(n) { return fmt(n / 16); }
 
     /**
-     * Find the first Cube directly inside a group and return its pivot
-     * (element.origin in Blockbench API = "Pivot Point" in the Transform panel).
-     * Returns null if no cube is found.
-     */
-    function getFirstCubePivot(group) {
-        for (const child of group.children) {
-            if (child instanceof Cube) return child.origin; // [x, y, z] absolute px
-        }
-        // recurse one level into child groups
-        for (const child of group.children) {
-            if (child instanceof Group) {
-                const p = getFirstCubePivot(child);
-                if (p) return p;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Extract offset and pivot for a named group.
-     *   offset = group.origin / 16  (entity placement from vehicle centre)
-     *   pivot  = (cube.pivotPoint - group.origin) / 16  (rotation centre in model space)
-     * Falls back to pivot (0,0,0) if no cube is found.
+     * Extract offset for a named group.
+     * offset = group.origin / 16  (entity placement from vehicle centre)
      */
     function extractPart(groupName) {
         const group = findGroup(groupName);
@@ -83,17 +62,7 @@
         const [gx, gy, gz] = group.origin;
         const offset = { x: px(gx), y: px(gy), z: px(gz) };
 
-        let pivot = { x: 0, y: 0, z: 0 };
-        const cp = getFirstCubePivot(group);
-        if (cp) {
-            pivot = {
-                x: fmt((cp[0] - gx) / 16),
-                y: fmt((cp[1] - gy) / 16),
-                z: fmt((cp[2] - gz) / 16),
-            };
-        }
-
-        return { offset, pivot };
+        return { offset };
     }
 
     // ── YAML generation ────────────────────────────────────────────────────
@@ -127,8 +96,6 @@
             lines.push(`${I2}  custom-model-data: ${swCmd}`);
             lines.push(`${I2}  offset:`);
             lines.push(vec3yaml(sw.offset, `${I2}    `));
-            lines.push(`${I2}  pivot:`);
-            lines.push(vec3yaml(sw.pivot, `${I2}    `));
         }
 
         // doors
@@ -142,8 +109,6 @@
             lines.push(`${I2}    custom-model-data: ${doorCmds[i]}`);
             lines.push(`${I2}    offset:`);
             lines.push(vec3yaml(d.offset, `${I2}      `));
-            lines.push(`${I2}    pivot:`);
-            lines.push(vec3yaml(d.pivot, `${I2}      `));
         }
 
         // wheels — wheel_0 → FL + FR,  wheel_1 (or wheel_0) → RL + RR
@@ -165,19 +130,14 @@
             lines.push(`${I2}    custom-model-data: ${wheelCmd}`);
             lines.push(`${I2}    offset:`);
             lines.push(vec3yaml(data.offset, `${I2}      `));
-            lines.push(`${I2}    pivot:`);
-            lines.push(vec3yaml(data.pivot, `${I2}      `));
             // RIGHT — mirror X
             const rOffset = { x: fmt(-data.offset.x), y: data.offset.y, z: data.offset.z };
-            const rPivot  = { x: fmt(-data.pivot.x),  y: data.pivot.y,  z: data.pivot.z  };
             lines.push(`${I2}  - type: RIGHT`);
             lines.push(`${I2}    front: ${front}`);
             lines.push(`${I2}    material: PAPER`);
             lines.push(`${I2}    custom-model-data: ${wheelCmd}`);
             lines.push(`${I2}    offset:`);
             lines.push(vec3yaml(rOffset, `${I2}      `));
-            lines.push(`${I2}    pivot:`);
-            lines.push(vec3yaml(rPivot, `${I2}      `));
         }
 
         // seat
@@ -264,7 +224,7 @@
     Plugin.register("unique_vehicle_config_exporter", {
         title:       "UniqueVehicle Config Exporter",
         author:      "UniqueVehiclePlugin",
-        description: "Exports group origins as config.yml offsets/pivots for UniqueVehiclePlugin.",
+        description: "Exports group origins as config.yml offsets for UniqueVehiclePlugin.",
         version:     "1.1.0",
         min_version: "4.8.0",
         variant:     "both",

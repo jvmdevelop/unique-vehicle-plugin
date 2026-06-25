@@ -15,7 +15,8 @@ import java.util.List;
 
 public class VehicleSteeringWheelProcessor extends Processor {
 
-    private static final float STEER_ANGLE = (float) Math.toRadians(30);
+    private static final float MAX_STEER_ANGLE = (float) Math.toRadians(30);
+    private static final float STEER_RATE = 0.08f;
 
     public VehicleSteeringWheelProcessor(List<Vehicle> vehicles) {
         super(vehicles);
@@ -30,7 +31,6 @@ public class VehicleSteeringWheelProcessor extends Processor {
     protected void processVehicle(Vehicle vehicle, boolean log) {
         PartCustomization c = vehicle.getCustomization().getPart("steering_wheel");
         var offset = vehicle.getConfig().steeringWheel().offset();
-        var pivotCfg = vehicle.getConfig().steeringWheel().pivot();
 
         Location loc = VehicleTransformUtil.computePartLocation(vehicle.getLocation(),
                 offset.x + c.getDeltaX(),
@@ -40,33 +40,36 @@ public class VehicleSteeringWheelProcessor extends Processor {
 
         vehicle.getSteeringWheel().teleport(loc);
 
-        float angle = 0;
+        float target = 0;
         Player driver = vehicle.getDriver();
         if (driver != null) {
             Input input = driver.getCurrentInput();
-            if (input.isLeft()) angle = STEER_ANGLE;
-            if (input.isRight()) angle = -STEER_ANGLE;
+            if (input.isLeft()) target = MAX_STEER_ANGLE;
+            if (input.isRight()) target = -MAX_STEER_ANGLE;
         }
 
+        float current = vehicle.getSteeringAngle();
+        float diff = target - current;
+        if (Math.abs(diff) < STEER_RATE) {
+            current = target;
+        } else {
+            current += Math.signum(diff) * STEER_RATE;
+        }
+        vehicle.setSteeringAngle(current);
+
         Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
-        Quaternionf rotation = new Quaternionf().rotateZ(angle).mul(baseRot);
+        Quaternionf rotation = new Quaternionf(baseRot).rotateZ(current);
 
         Transformation t = vehicle.getSteeringWheel().getTransformation();
-        Vector3f scale = new Vector3f(t.getScale());
-        Vector3f pivot = new Vector3f(
-                (float) (pivotCfg.x + c.getPivotDeltaX()),
-                (float) (pivotCfg.y + c.getPivotDeltaY()),
-                (float) (pivotCfg.z + c.getPivotDeltaZ()));
-        Vector3f translation = VehicleTransformUtil.computePivotTranslation(pivot, rotation, scale);
+        Vector3f scale = new Vector3f(Math.abs(t.getScale().x), Math.abs(t.getScale().y), Math.abs(t.getScale().z));
 
         vehicle.getSteeringWheel().setTransformation(new Transformation(
-                translation, rotation, scale, t.getRightRotation()
+                new Vector3f(0, 0, 0), rotation, scale, t.getRightRotation()
         ));
 
         if (log) {
-            LOGGER.info(String.format("[Parts] steering_wheel -> x=%.3f y=%.3f z=%.3f yaw=%.1f rot=%.1f | pivot=(%.4f,%.4f,%.4f)",
-                    loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), c.getRotationYaw(),
-                    pivotCfg.x, pivotCfg.y, pivotCfg.z));
+            LOGGER.info(String.format("[Parts] steering_wheel -> x=%.3f y=%.3f z=%.3f yaw=%.1f rot=%.1f angle=%.3f",
+                    loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), c.getRotationYaw(), current));
         }
     }
 }
