@@ -8,6 +8,7 @@ import com.jvmd.uniqueVehiclePlugin.customization.VehicleDatabase;
 import com.jvmd.uniqueVehiclePlugin.gui.VehicleEditorGui;
 import com.jvmd.uniqueVehiclePlugin.gui.VehiclePartEditor;
 import com.jvmd.uniqueVehiclePlugin.listener.VehicleListener;
+import com.jvmd.uniqueVehiclePlugin.protocol.VehicleSeatPacketController;
 import com.jvmd.uniqueVehiclePlugin.resourcepack.ResourcePackListener;
 import com.jvmd.uniqueVehiclePlugin.resourcepack.ResourcePackServer;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleBodyManager;
@@ -61,6 +62,7 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
         VehicleDoorsProcessor doorsProcessor = new VehicleDoorsProcessor(vehicles);
         VehicleWheelsProcessor wheelsProcessor = new VehicleWheelsProcessor(vehicles);
         VehicleSteeringWheelProcessor steeringWheelProcessor = new VehicleSteeringWheelProcessor(vehicles);
+        VehicleSeatPacketController seatPacketController = new VehicleSeatPacketController();
 
         VehicleMovingManager movingManager = new VehicleMovingManager(
                 drivingProcessor, driftProcessor, brakeProcessor, physicsProcessor,
@@ -68,13 +70,13 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
         );
         VehicleBodyManager bodyManager = new VehicleBodyManager(frameProcessor, doorsProcessor, wheelsProcessor, steeringWheelProcessor, vehicles);
 
-        VehicleListener listener = new VehicleListener(registry, physicsProcessor);
+        VehicleListener listener = new VehicleListener(registry, physicsProcessor, seatPacketController);
         registry.setOnRemoveCallback(listener::onVehicleRemoved);
 
         VehiclePartEditor partEditor = new VehiclePartEditor(database, this);
         VehicleEditorGui editorGui = new VehicleEditorGui(database, partEditor, this);
 
-        VehicleTickTask tickTask = new VehicleTickTask(movingManager, bodyManager, registry, partEditor);
+        VehicleTickTask tickTask = new VehicleTickTask(movingManager, bodyManager, registry, partEditor, seatPacketController);
         tickTask.runTaskTimer(this, 0L, 1L);
 
         VehicleCommand command = new VehicleCommand(vehicleConfigs, assembler, registry, database, editorGui, this);

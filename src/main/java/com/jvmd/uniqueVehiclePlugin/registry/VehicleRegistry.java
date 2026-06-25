@@ -47,8 +47,12 @@ public class VehicleRegistry {
     }
 
     public Vehicle getByPassenger(Entity passenger) {
+        return getByDriver(passenger);
+    }
+
+    public Vehicle getByDriver(Entity passenger) {
         for (Vehicle vehicle : vehicles) {
-            if (vehicle.getSeat() != null && vehicle.getSeat().getPassengers().contains(passenger)) {
+            if (passenger instanceof org.bukkit.entity.Player player && vehicle.isDriver(player)) {
                 return vehicle;
             }
         }

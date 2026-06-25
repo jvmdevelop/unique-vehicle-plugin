@@ -2,23 +2,26 @@ package com.jvmd.uniqueVehiclePlugin.listener;
 
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.processor.impl.VehiclePhysicsProcessor;
+import com.jvmd.uniqueVehiclePlugin.protocol.VehicleSeatPacketController;
 import com.jvmd.uniqueVehiclePlugin.registry.VehicleRegistry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class VehicleListener implements Listener {
 
     private final VehicleRegistry registry;
     private final VehiclePhysicsProcessor physicsProcessor;
+    private final VehicleSeatPacketController seatPacketController;
 
-    public VehicleListener(VehicleRegistry registry, VehiclePhysicsProcessor physicsProcessor) {
+    public VehicleListener(VehicleRegistry registry, VehiclePhysicsProcessor physicsProcessor, VehicleSeatPacketController seatPacketController) {
         this.registry = registry;
         this.physicsProcessor = physicsProcessor;
+        this.seatPacketController = seatPacketController;
     }
 
     @EventHandler
@@ -40,18 +43,22 @@ public class VehicleListener implements Listener {
 
         if (!vehicle.hasOpenDoor()) return;
 
-        vehicle.getSeat().addPassenger(player);
+        vehicle.setDriver(player);
+        seatPacketController.enter(vehicle, player);
         // Close doors after entering
         vehicle.closeAllDoors();
     }
 
     @EventHandler
-    public void onDismount(EntityDismountEvent event) {
-        if (!(event.getEntity() instanceof Player)) return;
+    public void onSneak(PlayerToggleSneakEvent event) {
+        if (!event.isSneaking()) return;
 
-        Vehicle vehicle = registry.getByEntity(event.getDismounted());
+        Player player = event.getPlayer();
+        Vehicle vehicle = registry.getByDriver(player);
         if (vehicle == null) return;
 
+        seatPacketController.exit(vehicle, player);
+        vehicle.clearDriver(player);
         vehicle.setSpeed(0);
         vehicle.setDrifting(false);
         vehicle.toggleDoors();
@@ -68,15 +75,21 @@ public class VehicleListener implements Listener {
     }
 
     private void handlePlayerLeave(Player player) {
-        Vehicle vehicle = registry.getByPassenger(player);
+        Vehicle vehicle = registry.getByDriver(player);
         if (vehicle == null) return;
 
-        vehicle.getSeat().eject();
+        seatPacketController.exit(vehicle, player);
+        vehicle.clearDriver(player);
         vehicle.setSpeed(0);
         vehicle.setDrifting(false);
     }
 
     public void onVehicleRemoved(Vehicle vehicle) {
+        Player driver = vehicle.getDriver();
+        if (driver != null) {
+            seatPacketController.exit(vehicle, driver);
+            vehicle.clearDriver(driver);
+        }
         physicsProcessor.clearVehicle(vehicle.getFrame().getItemDisplay().getUniqueId());
     }
 }

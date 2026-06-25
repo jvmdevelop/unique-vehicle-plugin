@@ -4,6 +4,8 @@ version: '${version}'
 main: com.jvmd.uniqueVehiclePlugin.UniqueVehiclePlugin
 api-version: '1.21.4'
 load: POSTWORLD
+depend:
+  - ProtocolLib
 
 commands:
   vehicle:

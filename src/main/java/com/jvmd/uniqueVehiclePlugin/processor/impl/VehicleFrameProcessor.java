@@ -36,8 +36,6 @@ public class VehicleFrameProcessor extends Processor {
         frame.getItemDisplay().setTransformation(new Transformation(
                 t.getTranslation(), baseRot, t.getScale(), t.getRightRotation()));
 
-        vehicle.teleportSeat();
-
         if (log) {
             LOGGER.info(String.format("[Parts] frame -> x=%.3f y=%.3f z=%.3f yaw=%.1f rot=%.1f",
                     loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), c.getRotationYaw()));

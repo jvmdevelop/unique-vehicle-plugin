@@ -9,7 +9,6 @@ import com.jvmd.uniqueVehiclePlugin.entity.VehicleFrame;
 import com.jvmd.uniqueVehiclePlugin.entity.Wheel;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Interaction;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
@@ -46,17 +45,21 @@ public class VehicleAssembler {
 
         var seatCustom = customization.getPart("seat");
         Vector3d seatOffset = config.seatOffset();
+        float seatScale = customization.getGlobalScale();
         Location seatLoc = location.clone().add(
-                seatOffset.x + seatCustom.getDeltaX(),
-                seatOffset.y + seatCustom.getDeltaY(),
-                seatOffset.z + seatCustom.getDeltaZ());
-        ArmorStand seat = world.spawn(seatLoc, ArmorStand.class, as -> {
+                (seatOffset.x + seatCustom.getDeltaX()) * seatScale,
+                (seatOffset.y + seatCustom.getDeltaY()) * seatScale,
+                (seatOffset.z + seatCustom.getDeltaZ()) * seatScale);
+        org.bukkit.entity.ArmorStand seat = world.spawn(seatLoc, org.bukkit.entity.ArmorStand.class, as -> {
+            as.setInvisible(true);
             as.setVisible(false);
             as.setGravity(false);
             as.setInvulnerable(true);
             as.setSilent(true);
             as.setSmall(true);
             as.setMarker(true);
+            as.setCollidable(false);
+            as.setPersistent(false);
             as.setCanPickupItems(false);
         });
 

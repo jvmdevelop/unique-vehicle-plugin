@@ -7,6 +7,7 @@ import com.jvmd.uniqueVehiclePlugin.customization.VehicleCustomization;
 import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
 import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.Location;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Interaction;
 import org.bukkit.entity.ItemDisplay;
@@ -32,6 +33,7 @@ public class Vehicle {
     private Location location;
     private double speed;
     private boolean drifting;
+    private UUID driverId;
 
     public Vehicle(VehicleConfig config, VehicleFrame frame, ItemDisplay steeringWheel, VehicleDoor[] doors, Wheel[] wheels, Entity seat, Interaction hitbox, Location location, VehicleCustomization customization) {
         this.config = config;
@@ -46,8 +48,23 @@ public class Vehicle {
     }
 
     public Player getDriver() {
-        if (seat == null || seat.getPassengers().isEmpty()) return null;
-        return seat.getPassengers().getFirst() instanceof Player p ? p : null;
+        if (driverId == null) return null;
+        return Bukkit.getPlayer(driverId);
+    }
+
+    public boolean isDriver(Player player) {
+        return player != null && driverId != null && driverId.equals(player.getUniqueId());
+    }
+
+    public void setDriver(Player player) {
+        driverId = player == null ? null : player.getUniqueId();
+    }
+
+    public void clearDriver(Player player) {
+        if (player == null) return;
+        if (driverId != null && driverId.equals(player.getUniqueId())) {
+            driverId = null;
+        }
     }
 
     public boolean hasEntity(Entity entity) {
@@ -68,19 +85,28 @@ public class Vehicle {
     public void teleportSeat() {
         if (seat == null) return;
 
-        Vector3d seatOffset = config.seatOffset();
-        var c = customization.getPart("seat");
-        Location seatLoc = VehicleTransformUtil.computePartLocation(location,
-                seatOffset.x + c.getDeltaX(),
-                seatOffset.y + c.getDeltaY(),
-                seatOffset.z + c.getDeltaZ());
-        seatLoc.setYaw(location.getYaw());
-
+        Location seatLoc = computeSeatLocation();
         seat.teleport(seatLoc, TeleportFlag.EntityState.RETAIN_PASSENGERS);
 
         if (hitbox != null) {
             hitbox.teleport(location);
         }
+    }
+
+    public Location getSeatLocation() {
+        return computeSeatLocation();
+    }
+
+    private Location computeSeatLocation() {
+        Vector3d seatOffset = config.seatOffset();
+        var c = customization.getPart("seat");
+        float scale = customization.getGlobalScale();
+        Location seatLoc = VehicleTransformUtil.computePartLocation(location,
+                (seatOffset.x + c.getDeltaX()) * scale,
+                (seatOffset.y + c.getDeltaY()) * scale,
+                (seatOffset.z + c.getDeltaZ()) * scale);
+        seatLoc.setYaw(location.getYaw());
+        return seatLoc;
     }
 
     public void applyGlobalScale(float scale) {

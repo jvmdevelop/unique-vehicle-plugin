@@ -30,8 +30,8 @@ public class VehicleWheelsProcessor extends Processor {
         Player driver = vehicle.getDriver();
         if (driver != null) {
             Input input = driver.getCurrentInput();
-            if (input.isLeft()) steerAngle = -STEER_ANGLE;
-            if (input.isRight()) steerAngle = STEER_ANGLE;
+            if (input.isLeft()) steerAngle = STEER_ANGLE;
+            if (input.isRight()) steerAngle = -STEER_ANGLE;
         }
 
         Wheel[] wheels = vehicle.getWheels();
