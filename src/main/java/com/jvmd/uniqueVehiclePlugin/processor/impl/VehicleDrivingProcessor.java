@@ -37,11 +37,9 @@ public class VehicleDrivingProcessor extends Processor {
         if (speed != 0 && (input.isLeft() || input.isRight())) {
             Location loc = vehicle.getLocation();
             float yaw = loc.getYaw();
-            // Turn rate scales with speed — slower at low speed, full at high speed
             float speedFactor = (float) Math.min(Math.abs(speed) / (physics.maxSpeed() * 0.5), 1.0);
             float effectiveTurn = physics.turnRate() * speedFactor;
 
-            // Reverse steering when going backward
             if (speed < 0) effectiveTurn = -effectiveTurn;
 
             if (input.isLeft()) yaw -= effectiveTurn;
@@ -68,7 +66,6 @@ public class VehicleDrivingProcessor extends Processor {
 
         boolean movingForward = speed > 0;
         if (isBlocked(next, rad, physics, movingForward)) {
-            // Try step-up (1 block)
             Location stepUp = next.clone().add(0, 1, 0);
             if (!isBlocked(stepUp, rad, physics, movingForward) && movingForward) {
                 next.setY(next.getY() + 1);
@@ -91,16 +88,13 @@ public class VehicleDrivingProcessor extends Processor {
         double sideZ = Math.sin(rad);
 
         for (double h = 0.5; h <= 1.5; h += 1.0) {
-            // Only check the direction we're moving in
             double dirX = movingForward ? forwardX : -forwardX;
             double dirZ = movingForward ? forwardZ : -forwardZ;
 
-            // Leading edge: center, left, right
             if (isSolidAt(loc, dirX * halfLength, h, dirZ * halfLength)) return true;
             if (isSolidAt(loc, dirX * halfLength + sideX * halfWidth, h, dirZ * halfLength + sideZ * halfWidth)) return true;
             if (isSolidAt(loc, dirX * halfLength - sideX * halfWidth, h, dirZ * halfLength - sideZ * halfWidth)) return true;
 
-            // Side midpoints
             if (isSolidAt(loc, sideX * halfWidth, h, sideZ * halfWidth)) return true;
             if (isSolidAt(loc, -sideX * halfWidth, h, -sideZ * halfWidth)) return true;
         }

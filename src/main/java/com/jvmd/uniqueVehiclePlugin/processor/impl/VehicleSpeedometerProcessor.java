@@ -11,7 +11,7 @@ import java.util.List;
 
 public class VehicleSpeedometerProcessor extends Processor {
 
-    private static final double BLOCKS_PER_TICK_TO_KMH = 72.0; // 1 b/t ≈ 72 km/h (20 tps * 3.6)
+    private static final double BLOCKS_PER_TICK_TO_KMH = 72.0;
     private int tickCounter = 0;
 
     public VehicleSpeedometerProcessor(List<Vehicle> vehicles) {
@@ -21,7 +21,7 @@ public class VehicleSpeedometerProcessor extends Processor {
     @Override
     public void process() {
         tickCounter++;
-        if (tickCounter % 2 != 0) return; // Update every 2 ticks (100ms)
+        if (tickCounter % 2 != 0) return;
         super.process();
     }
 
@@ -34,7 +34,6 @@ public class VehicleSpeedometerProcessor extends Processor {
         double maxSpeed = vehicle.getPhysics().maxSpeed();
         int kmh = (int) Math.round(Math.abs(speed) * BLOCKS_PER_TICK_TO_KMH);
 
-        // Color: green -> yellow -> red based on speed ratio
         double ratio = Math.abs(speed) / maxSpeed;
         TextColor color;
         if (ratio < 0.5) {

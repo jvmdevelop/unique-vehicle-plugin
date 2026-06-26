@@ -6,8 +6,8 @@ import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfigParser;
 import com.jvmd.uniqueVehiclePlugin.customization.VehicleDatabase;
 import com.jvmd.uniqueVehiclePlugin.listener.VehicleListener;
-import com.jvmd.uniqueVehiclePlugin.protocol.VehicleSeatPacketController;
-import com.jvmd.uniqueVehiclePlugin.resourcepack.ResourcePackListener;
+import com.jvmd.uniqueVehiclePlugin.manager.impl.SeatPacketManager;
+import com.jvmd.uniqueVehiclePlugin.listener.ResourcePackListener;
 import com.jvmd.uniqueVehiclePlugin.resourcepack.ResourcePackServer;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleBodyManager;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleMovingManager;
@@ -60,7 +60,7 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
         VehicleDoorsProcessor doorsProcessor = new VehicleDoorsProcessor(vehicles);
         VehicleWheelsProcessor wheelsProcessor = new VehicleWheelsProcessor(vehicles);
         VehicleSteeringWheelProcessor steeringWheelProcessor = new VehicleSteeringWheelProcessor(vehicles);
-        VehicleSeatPacketController seatPacketController = new VehicleSeatPacketController();
+        SeatPacketManager seatPacketController = new SeatPacketManager();
 
         VehicleMovingManager movingManager = new VehicleMovingManager(
                 drivingProcessor, driftProcessor, brakeProcessor, physicsProcessor,
@@ -80,7 +80,6 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(listener, this);
 
-        // Start resource pack HTTP server
         File zipFile = new File(getServer().getWorldContainer(), "unique-vehicle-resourcepack.zip");
         if (zipFile.exists()) {
             int port = getConfig().getInt("resource-pack-port", 8181);

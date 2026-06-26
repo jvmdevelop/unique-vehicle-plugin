@@ -1,8 +1,8 @@
 package com.jvmd.uniqueVehiclePlugin.task;
 
+import com.jvmd.uniqueVehiclePlugin.manager.impl.SeatPacketManager;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleBodyManager;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleMovingManager;
-import com.jvmd.uniqueVehiclePlugin.protocol.VehicleSeatPacketController;
 import com.jvmd.uniqueVehiclePlugin.registry.VehicleRegistry;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -11,10 +11,10 @@ public class VehicleTickTask extends BukkitRunnable {
     private final VehicleMovingManager movingManager;
     private final VehicleBodyManager bodyManager;
     private final VehicleRegistry registry;
-    private final VehicleSeatPacketController seatPacketController;
+    private final SeatPacketManager seatPacketController;
 
     public VehicleTickTask(VehicleMovingManager movingManager, VehicleBodyManager bodyManager,
-                           VehicleRegistry registry, VehicleSeatPacketController seatPacketController) {
+                           VehicleRegistry registry, SeatPacketManager seatPacketController) {
         this.movingManager = movingManager;
         this.bodyManager = bodyManager;
         this.registry = registry;

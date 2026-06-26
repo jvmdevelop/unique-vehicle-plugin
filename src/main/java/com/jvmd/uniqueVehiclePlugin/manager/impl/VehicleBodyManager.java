@@ -9,7 +9,7 @@ import com.jvmd.uniqueVehiclePlugin.processor.impl.VehicleWheelsProcessor;
 
 import java.util.List;
 
-public class VehicleBodyManager extends Manager {
+public class VehicleBodyManager extends VehicleManager {
 
     private final VehicleFrameProcessor vehicleFrameProcessor;
     private final VehicleDoorsProcessor vehicleDoorsProcessor;

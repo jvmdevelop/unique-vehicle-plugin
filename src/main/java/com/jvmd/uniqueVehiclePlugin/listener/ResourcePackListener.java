@@ -1,4 +1,4 @@
-package com.jvmd.uniqueVehiclePlugin.resourcepack;
+package com.jvmd.uniqueVehiclePlugin.listener;
 
 import net.kyori.adventure.resource.ResourcePackInfo;
 import net.kyori.adventure.resource.ResourcePackRequest;

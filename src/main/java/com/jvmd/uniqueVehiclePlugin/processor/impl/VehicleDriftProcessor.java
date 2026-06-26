@@ -57,7 +57,7 @@ public class VehicleDriftProcessor extends Processor {
         double sin = Math.sin(rad);
 
         for (Wheel wheel : vehicle.getWheels()) {
-            if (wheel.isFront()) continue; // Smoke only from rear wheels
+            if (wheel.isFront()) continue;
 
             double ox = wheel.getOffset().x;
             double oy = wheel.getOffset().y;

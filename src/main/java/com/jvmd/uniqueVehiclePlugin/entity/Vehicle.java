@@ -94,10 +94,6 @@ public class Vehicle {
         }
     }
 
-    public Location getSeatLocation() {
-        return computeSeatLocation();
-    }
-
     private Location computeSeatLocation() {
         Vector3d seatOffset = config.seatOffset();
         var c = customization.getPart("seat");
@@ -109,27 +105,6 @@ public class Vehicle {
         seatLoc.setYaw(location.getYaw());
         return seatLoc;
     }
-
-    public void applyGlobalScale(float scale) {
-        customization.setGlobalScale(scale);
-        setDisplayScale(frame.getItemDisplay(), scale);
-        setDisplayScale(steeringWheel, scale);
-        for (VehicleDoor door : doors) setDisplayScale(door.getDoorModel(), scale);
-        for (Wheel wheel : wheels) setDisplayScale(wheel.getModel(), scale);
-    }
-
-    private void setDisplayScale(ItemDisplay display, float scale) {
-        Transformation t = display.getTransformation();
-        Vector3f currentScale = t.getScale();
-        display.setTransformation(new Transformation(
-                t.getTranslation(), t.getLeftRotation(),
-                new Vector3f(
-                        Math.copySign(scale, currentScale.x == 0 ? 1 : currentScale.x),
-                        Math.copySign(scale, currentScale.y == 0 ? 1 : currentScale.y),
-                        Math.copySign(scale, currentScale.z == 0 ? 1 : currentScale.z)),
-                t.getRightRotation()));
-    }
-
     public void toggleDoors() {
         for (VehicleDoor door : doors) {
             door.toggleDoor();

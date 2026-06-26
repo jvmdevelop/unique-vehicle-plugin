@@ -30,9 +30,7 @@ public class VehicleSoundProcessor extends Processor {
         double speed = Math.abs(vehicle.getSpeed());
         Location loc = vehicle.getLocation();
 
-        // Engine sound — frequency scales with speed
         if (speed > 0.01) {
-            // Play engine sound every N ticks (faster at higher speed)
             int interval = Math.max(2, (int) (10 - speed * 6));
             if (tickCounter % interval == 0) {
                 float pitch = 0.5f + (float) (speed / vehicle.getPhysics().maxSpeed()) * 1.2f;
@@ -40,7 +38,6 @@ public class VehicleSoundProcessor extends Processor {
             }
         }
 
-        // Drift screech
         if (vehicle.isDrifting() && speed > 0.3 && tickCounter % 4 == 0) {
             loc.getWorld().playSound(loc, Sound.ENTITY_PHANTOM_FLAP, 0.5f, 1.8f);
         }

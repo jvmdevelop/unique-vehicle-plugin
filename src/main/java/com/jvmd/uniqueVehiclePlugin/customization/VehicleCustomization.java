@@ -23,24 +23,8 @@ public class VehicleCustomization {
         return parts.computeIfAbsent(key, k -> new PartCustomization());
     }
 
-    public void setPart(String key, PartCustomization part) {
-        parts.put(key, part);
-    }
-
-    public void resetPart(String key) {
-        parts.put(key, new PartCustomization());
-    }
-
     public Map<String, PartCustomization> getAllParts() {
         return parts;
     }
 
-    public VehicleCustomization copy() {
-        VehicleCustomization copy = new VehicleCustomization(vehicleId);
-        copy.globalScale = globalScale;
-        for (Map.Entry<String, PartCustomization> entry : parts.entrySet()) {
-            copy.parts.put(entry.getKey(), entry.getValue().copy());
-        }
-        return copy;
-    }
 }

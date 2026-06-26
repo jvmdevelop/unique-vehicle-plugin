@@ -24,10 +24,8 @@ public class VehicleBrakeProcessor extends Processor {
 
         if (input.isBackward()) {
             if (vehicle.getSpeed() > 0) {
-                // Braking while moving forward
                 vehicle.setSpeed(Math.max(vehicle.getSpeed() - physics.brakeForce(), 0));
             } else {
-                // Reverse driving
                 double newSpeed = vehicle.getSpeed() - physics.reverseAcceleration();
                 vehicle.setSpeed(Math.max(newSpeed, -physics.reverseMaxSpeed()));
             }

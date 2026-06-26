@@ -26,14 +26,14 @@ public class VehicleWheelsProcessor extends Processor {
     @Override
     protected void processVehicle(Vehicle vehicle, boolean log) {
         float steerAngle = 0;
-        Player driver = vehicle.getDriver();
+        var driver = vehicle.getDriver();
         if (driver != null) {
-            Input input = driver.getCurrentInput();
+            var input = driver.getCurrentInput();
             if (input.isLeft()) steerAngle = STEER_ANGLE;
             if (input.isRight()) steerAngle = -STEER_ANGLE;
         }
 
-        Wheel[] wheels = vehicle.getWheels();
+        var wheels = vehicle.getWheels();
         for (int i = 0; i < wheels.length; i++) {
             Wheel wheel = wheels[i];
             PartCustomization c = vehicle.getCustomization().getPart("wheel_" + i);
@@ -56,7 +56,7 @@ public class VehicleWheelsProcessor extends Processor {
             if (wheel.isFront() && steerAngle != 0) {
                 steerQ.rotateY(steerAngle);
             }
-            // Apply wheel-local motion before vehicle yaw so the axle stays fixed.
+
             Quaternionf rotation = new Quaternionf(baseRot).mul(steerQ).mul(spinQ);
 
             Transformation t = wheel.getModel().getTransformation();

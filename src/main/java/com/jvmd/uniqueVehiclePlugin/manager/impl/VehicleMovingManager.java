@@ -1,12 +1,12 @@
 package com.jvmd.uniqueVehiclePlugin.manager.impl;
 
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
-import com.jvmd.uniqueVehiclePlugin.manager.Manager;
+
 import com.jvmd.uniqueVehiclePlugin.processor.impl.*;
 
 import java.util.List;
 
-public class VehicleMovingManager extends Manager {
+public class VehicleMovingManager extends VehicleManager {
 
     private final VehicleDrivingProcessor vehicleMovingProcessor;
     private final VehicleDriftProcessor vehicleDriftProcessor;

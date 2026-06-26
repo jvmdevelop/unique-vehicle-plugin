@@ -30,7 +30,6 @@ public class VehicleFrameProcessor extends Processor {
 
         frame.getItemDisplay().teleport(loc);
 
-        // Apply base rotation (rotationYaw) to ItemDisplay transformation
         Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
         Transformation t = frame.getItemDisplay().getTransformation();
         frame.getItemDisplay().setTransformation(new Transformation(

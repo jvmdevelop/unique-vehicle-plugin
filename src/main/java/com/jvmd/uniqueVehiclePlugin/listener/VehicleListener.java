@@ -1,8 +1,8 @@
 package com.jvmd.uniqueVehiclePlugin.listener;
 
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
+import com.jvmd.uniqueVehiclePlugin.manager.impl.SeatPacketManager;
 import com.jvmd.uniqueVehiclePlugin.processor.impl.VehiclePhysicsProcessor;
-import com.jvmd.uniqueVehiclePlugin.protocol.VehicleSeatPacketController;
 import com.jvmd.uniqueVehiclePlugin.registry.VehicleRegistry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,9 +16,9 @@ public class VehicleListener implements Listener {
 
     private final VehicleRegistry registry;
     private final VehiclePhysicsProcessor physicsProcessor;
-    private final VehicleSeatPacketController seatPacketController;
+    private final SeatPacketManager seatPacketController;
 
-    public VehicleListener(VehicleRegistry registry, VehiclePhysicsProcessor physicsProcessor, VehicleSeatPacketController seatPacketController) {
+    public VehicleListener(VehicleRegistry registry, VehiclePhysicsProcessor physicsProcessor, SeatPacketManager seatPacketController) {
         this.registry = registry;
         this.physicsProcessor = physicsProcessor;
         this.seatPacketController = seatPacketController;
@@ -33,19 +33,16 @@ public class VehicleListener implements Listener {
         Player player = event.getPlayer();
 
         if (player.isSneaking()) {
-            // Shift + RMB = toggle doors
             vehicle.toggleDoors();
             return;
         }
 
-        // Normal RMB = enter vehicle (only if a door is open)
         if (vehicle.getDriver() != null) return;
 
         if (!vehicle.hasOpenDoor()) return;
 
         vehicle.setDriver(player);
         seatPacketController.enter(vehicle, player);
-        // Close doors after entering
         vehicle.closeAllDoors();
     }
 

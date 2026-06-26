@@ -1,8 +1,8 @@
 package com.jvmd.uniqueVehiclePlugin.registry;
 
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
-import com.jvmd.uniqueVehiclePlugin.listener.VehicleListener;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class VehicleRegistry {
 
     public Vehicle getByDriver(Entity passenger) {
         for (Vehicle vehicle : vehicles) {
-            if (passenger instanceof org.bukkit.entity.Player player && vehicle.isDriver(player)) {
+            if (passenger instanceof Player player && vehicle.isDriver(player)) {
                 return vehicle;
             }
         }

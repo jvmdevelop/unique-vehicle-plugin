@@ -36,7 +36,6 @@ public class VehicleDoorsProcessor extends Processor {
 
             door.getDoorModel().teleport(loc);
 
-            // Apply door-local opening after the configured part yaw.
             Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
             Quaternionf animRot = new Quaternionf();
             if (door.isOpen()) {

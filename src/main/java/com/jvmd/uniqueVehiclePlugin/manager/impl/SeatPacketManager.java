@@ -1,4 +1,4 @@
-package com.jvmd.uniqueVehiclePlugin.protocol;
+package com.jvmd.uniqueVehiclePlugin.manager.impl;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class VehicleSeatPacketController {
+public class SeatPacketManager {
 
     private final ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
     private final Map<java.util.UUID, SeatState> states = new HashMap<>();
