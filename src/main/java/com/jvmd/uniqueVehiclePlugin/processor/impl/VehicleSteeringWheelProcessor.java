@@ -1,6 +1,5 @@
 package com.jvmd.uniqueVehiclePlugin.processor.impl;
 
-import com.jvmd.uniqueVehiclePlugin.customization.PartCustomization;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.processor.Processor;
 import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
@@ -29,13 +28,12 @@ public class VehicleSteeringWheelProcessor extends Processor {
 
     @Override
     protected void processVehicle(Vehicle vehicle, boolean log) {
-        PartCustomization c = vehicle.getCustomization().getPart("steering_wheel");
         var offset = vehicle.getConfig().steeringWheel().offset();
 
         Location loc = VehicleTransformUtil.computePartLocation(vehicle.getLocation(),
-                offset.x + c.getDeltaX(),
-                offset.y + c.getDeltaY(),
-                offset.z + c.getDeltaZ());
+                offset.x ,
+                offset.y ,
+                offset.z);
         loc.setYaw(vehicle.getLocation().getYaw());
 
         vehicle.getSteeringWheel().teleport(loc);
@@ -57,8 +55,7 @@ public class VehicleSteeringWheelProcessor extends Processor {
         }
         vehicle.setSteeringAngle(current);
 
-        Quaternionf baseRot = new Quaternionf().rotateY((float) Math.toRadians(c.getRotationYaw()));
-        Quaternionf rotation = new Quaternionf(baseRot).rotateZ(current);
+        Quaternionf rotation = new Quaternionf().rotateZ(current);
 
         Transformation t = vehicle.getSteeringWheel().getTransformation();
         Vector3f scale = new Vector3f(Math.abs(t.getScale().x), Math.abs(t.getScale().y), Math.abs(t.getScale().z));
@@ -66,10 +63,5 @@ public class VehicleSteeringWheelProcessor extends Processor {
         vehicle.getSteeringWheel().setTransformation(new Transformation(
                 new Vector3f(0, 0, 0), rotation, scale, t.getRightRotation()
         ));
-
-        if (log) {
-            LOGGER.info(String.format("[Parts] steering_wheel -> x=%.3f y=%.3f z=%.3f yaw=%.1f rot=%.1f angle=%.3f",
-                    loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), c.getRotationYaw(), current));
-        }
     }
 }

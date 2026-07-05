@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 public abstract class Processor {
     protected final List<Vehicle> vehicles;
-    protected static final Logger LOGGER = Logger.getLogger("UniqueVehiclePlugin");
 
     private int tickCount = 0;
     private static final int LOG_INTERVAL = 20;
