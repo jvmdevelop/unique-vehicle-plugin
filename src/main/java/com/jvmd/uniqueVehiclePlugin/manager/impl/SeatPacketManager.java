@@ -41,7 +41,10 @@ public class SeatPacketManager {
 
         refreshSeatEntity(vehicle, driver);
         mount(vehicle, driver);
-        sendMountPacket(vehicle, driver);
+        sendMountPacket(vehicle.getSeat(), driver);
+        for (int i = 0; i < vehicle.getPassengerSeat().length; i++) {
+            sendMountPacket(vehicle.getPassengerSeat()[i], driver);
+        }
     }
 
     private void restore(Player player) {
@@ -54,8 +57,8 @@ public class SeatPacketManager {
 
     private void mount(Vehicle vehicle, Player player) {
         Entity seat = vehicle.getSeat();
-        if (!seat.getPassengers().contains(player)) {
-            seat.addPassenger(player);
+        if (!seat.addPassenger(player)) {
+            vehicle.addPassenger(player);
         }
         player.setFallDistance(0);
         player.setVelocity(player.getVelocity().zero());
@@ -69,9 +72,12 @@ public class SeatPacketManager {
     private void unmount(Vehicle vehicle, Player player) {
         Entity seat = vehicle.getSeat();
         if (seat.getPassengers().contains(player)) {
-            seat.removePassenger(player);
+            if (!seat.removePassenger(player)) {
+                Entity entity = vehicle.unmountPassenger(player.getUniqueId());
+                sendMountPacket(entity, null);
+            }
         }
-        sendMountPacket(vehicle, null);
+        sendMountPacket(vehicle.getSeat(), null);
     }
 
     private void refreshSeatEntity(Vehicle vehicle, Player driver) {
@@ -86,11 +92,10 @@ public class SeatPacketManager {
         }
     }
 
-    private void sendMountPacket(Vehicle vehicle, Player driver) {
-        Entity seat = vehicle.getSeat();
+    private void sendMountPacket(Entity seat, Player driver) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.MOUNT);
         packet.getIntegers().write(0, seat.getEntityId());
-        packet.getIntegerArrays().write(0, driver == null ? new int[0] : new int[] { driver.getEntityId() });
+        packet.getIntegerArrays().write(0, driver == null ? new int[0] : new int[]{driver.getEntityId()});
 
         List<Player> viewers = new ArrayList<>(seat.getTrackedBy());
         if (driver != null && !viewers.contains(driver)) {

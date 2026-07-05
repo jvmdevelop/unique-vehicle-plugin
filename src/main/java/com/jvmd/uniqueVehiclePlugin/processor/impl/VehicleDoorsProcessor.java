@@ -3,7 +3,6 @@ package com.jvmd.uniqueVehiclePlugin.processor.impl;
 import com.jvmd.uniqueVehiclePlugin.customization.PartCustomization;
 import com.jvmd.uniqueVehiclePlugin.entity.DoorType;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
-import com.jvmd.uniqueVehiclePlugin.entity.VehicleDoor;
 import com.jvmd.uniqueVehiclePlugin.processor.Processor;
 import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
 import org.bukkit.Location;

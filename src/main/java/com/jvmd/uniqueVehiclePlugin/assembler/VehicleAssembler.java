@@ -4,7 +4,6 @@ import com.jvmd.uniqueVehiclePlugin.config.PartConfig;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
 import com.jvmd.uniqueVehiclePlugin.customization.VehicleCustomization;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
-import com.jvmd.uniqueVehiclePlugin.entity.VehicleDoor;
 import com.jvmd.uniqueVehiclePlugin.entity.VehicleFrame;
 import com.jvmd.uniqueVehiclePlugin.entity.Wheel;
 import org.bukkit.Location;

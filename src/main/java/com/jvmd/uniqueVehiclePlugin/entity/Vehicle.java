@@ -5,18 +5,16 @@ import com.jvmd.uniqueVehiclePlugin.config.PhysicsConfig;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
 import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
 import io.papermc.paper.entity.TeleportFlag;
+import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Location;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Interaction;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Transformation;
-
-import org.joml.Quaternionf;
 import org.joml.Vector3d;
-import org.joml.Vector3f;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class Vehicle {
@@ -24,9 +22,12 @@ public class Vehicle {
     private final VehicleConfig config;
     private final VehicleFrame frame;
     private final ItemDisplay steeringWheel;
-    private final VehicleDoor[] doors;
     private final Wheel[] wheels;
     private final Entity seat;
+    private final Entity[] passengerSeat;
+    private final HashMap<UUID, Pair<Player, Integer>> passenger;
+    private int availableSeatsCount;
+    private final boolean[] availableSeats;
     private final Interaction hitbox;
     private Location location;
     private double speed;
@@ -34,16 +35,20 @@ public class Vehicle {
     private UUID driverId;
     private float steeringAngle;
 
-    public Vehicle(VehicleConfig config, VehicleFrame frame, ItemDisplay steeringWheel, VehicleDoor[] doors, Wheel[] wheels, Entity seat, Interaction hitbox, Location location) {
+    public Vehicle(VehicleConfig config, VehicleFrame frame, ItemDisplay steeringWheel, Wheel[] wheels, Entity seat, Entity[] passengerSeat, Interaction hitbox, Location location, int availableSeatsCount, boolean[] avaliableSeats) {
         this.config = config;
         this.frame = frame;
         this.steeringWheel = steeringWheel;
-        this.doors = doors;
         this.wheels = wheels;
         this.seat = seat;
+        this.passengerSeat = passengerSeat;
+        this.availableSeatsCount = availableSeatsCount;
+        this.passenger = new HashMap<>();
         this.hitbox = hitbox;
         this.location = location;
+        this.availableSeats = avaliableSeats;
     }
+
 
     public Player getDriver() {
         if (driverId == null) return null;
@@ -71,9 +76,6 @@ public class Vehicle {
         if (hitbox != null && hitbox.getUniqueId().equals(id)) return true;
         if (steeringWheel != null && steeringWheel.getUniqueId().equals(id)) return true;
         if (frame != null && frame.getItemDisplay().getUniqueId().equals(id)) return true;
-        for (VehicleDoor door : doors) {
-            if (door.getDoorModel().getUniqueId().equals(id)) return true;
-        }
         for (Wheel wheel : wheels) {
             if (wheel.getModel().getUniqueId().equals(id)) return true;
         }
@@ -99,31 +101,10 @@ public class Vehicle {
         return seatLoc;
     }
 
-    public void toggleDoors() {
-        for (VehicleDoor door : doors) {
-            door.toggleDoor();
-        }
-    }
-
-    public boolean hasOpenDoor() {
-        for (VehicleDoor door : doors) {
-            if (door.isOpen()) return true;
-        }
-        return false;
-    }
-
-    public void closeAllDoors() {
-        for (VehicleDoor door : doors) {
-            if (door.isOpen()) door.toggleDoor();
-        }
-    }
-
     public void despawn() {
         if (frame != null) frame.getItemDisplay().remove();
         if (steeringWheel != null) steeringWheel.remove();
-        for (VehicleDoor door : doors) {
-            door.getDoorModel().remove();
-        }
+
         for (Wheel wheel : wheels) {
             wheel.getModel().remove();
         }
@@ -150,10 +131,6 @@ public class Vehicle {
 
     public ItemDisplay getSteeringWheel() {
         return steeringWheel;
-    }
-
-    public VehicleDoor[] getDoors() {
-        return doors;
     }
 
     public Wheel[] getWheels() {
@@ -196,4 +173,41 @@ public class Vehicle {
         this.steeringAngle = steeringAngle;
     }
 
+
+    private int getAvailableSeatIndex() {
+        if (availableSeatsCount>0) {
+            for (int index = 0; index < availableSeats.length; index++) {
+                if (availableSeats[index]) {
+                    return index;
+                }
+            }
+        }
+        return -1;
+    }
+
+    public void addPassenger(Player player) {
+        if (availableSeatsCount <= 0) return;
+        int availableIndex = getAvailableSeatIndex();
+        passenger.put(player.getUniqueId(), Pair.of(player, availableIndex));
+        availableSeats[availableIndex] = true;
+        availableSeatsCount--;
+    }
+
+    public Entity unmountPassenger(UUID playerUUID) {
+        Pair<Player, Integer> playerWithAvailableCount = passenger.remove(playerUUID);
+        if (playerWithAvailableCount == null) return null;
+        Integer index = playerWithAvailableCount.right();
+        availableSeats[index] = false;
+        availableSeatsCount++;
+
+        return passengerSeat[index];
+    }
+
+    public Entity[] getPassengerSeat() {
+        return passengerSeat;
+    }
+
+    public HashMap<UUID, Pair<Player, Integer>> getPassenger() {
+        return passenger;
+    }
 }

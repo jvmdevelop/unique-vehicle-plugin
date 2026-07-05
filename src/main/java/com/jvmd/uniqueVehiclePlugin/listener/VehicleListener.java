@@ -32,18 +32,12 @@ public class VehicleListener implements Listener {
         event.setCancelled(true);
         Player player = event.getPlayer();
 
-        if (player.isSneaking()) {
-            vehicle.toggleDoors();
-            return;
+        if (vehicle.getDriver() != null) {
+            seatPacketController.enter(vehicle, player);
         }
-
-        if (vehicle.getDriver() != null) return;
-
-        if (!vehicle.hasOpenDoor()) return;
 
         vehicle.setDriver(player);
         seatPacketController.enter(vehicle, player);
-        vehicle.closeAllDoors();
     }
 
     @EventHandler
@@ -58,7 +52,6 @@ public class VehicleListener implements Listener {
         vehicle.clearDriver(player);
         vehicle.setSpeed(0);
         vehicle.setDrifting(false);
-        vehicle.toggleDoors();
     }
 
     @EventHandler
