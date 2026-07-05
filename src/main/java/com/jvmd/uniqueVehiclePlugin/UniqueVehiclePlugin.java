@@ -79,21 +79,6 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
         getCommand("vehicle").setTabCompleter(command);
 
         getServer().getPluginManager().registerEvents(listener, this);
-
-        File zipFile = new File(getServer().getWorldContainer(), "unique-vehicle-resourcepack.zip");
-        if (zipFile.exists()) {
-            int port = getConfig().getInt("resource-pack-port", 8181);
-            try {
-                resourcePackServer = new ResourcePackServer(this, zipFile, port);
-                getServer().getPluginManager().registerEvents(
-                        new ResourcePackListener(resourcePackServer.getUrl(), resourcePackServer.getSha1()), this);
-            } catch (IOException e) {
-                getLogger().warning("Could not start resource pack server: " + e.getMessage());
-            }
-        } else {
-            getLogger().warning("Resource pack not found at: " + zipFile.getPath());
-        }
-
         getLogger().info("UniqueVehiclePlugin enabled. Loaded " + vehicleConfigs.size() + " vehicle config(s).");
     }
 

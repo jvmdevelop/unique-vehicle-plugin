@@ -1,0 +1,118 @@
+{
+  "id" : "quad",
+  "displayName" : "&cQuad",
+  "typeId" : "bike",
+  "price" : 0.0,
+  "permissions" : {
+    "buy" : "vp.buy.ExampleBike",
+    "adjust" : "vp.adjust.ExampleBike",
+    "spawn" : "vp.spawn.ExampleBike",
+    "ride" : "vp.ride.ExampleBike",
+    "sitWithoutRidePermission" : true
+  },
+  "availableColors" : [ {
+    "red" : 0,
+    "green" : 0,
+    "blue" : 0
+  }],
+  "parts" : [ {
+    "type" : "bikeskin",
+    "xoffset" : 0.0,
+    "yoffset" : 0.0,
+    "zoffset" : 0.0,
+    "item" : {
+      "damage" : 76,
+      "material" : "LEATHER_CHESTPLATE",
+      "unbreakable" : true,
+      "color" : {
+        "red" : 255,
+        "green" : 255,
+        "blue" : 255
+      }
+    },
+    "wheelieOffset" : 0
+  }, {
+    "type" : "bikeseat",
+    "xoffset" : -0.5,
+    "yoffset" : -0.7,
+    "zoffset" : 0.0,
+    "steer" : true
+  }, {
+    "type" : "bikeseat",
+    "xoffset" : -1.0,
+    "yoffset" : -0.7,
+    "zoffset" : 0.0,
+    "steer" : false
+  } ],
+  "maxSpeed" : {
+    "base" : 100,
+    "max" : 200,
+    "step" : 5,
+    "stepCost" : 1000.0
+  },
+  "fuelTank" : {
+    "base" : 50,
+    "max" : 100,
+    "step" : 5,
+    "stepCost" : 1000.0
+  },
+  "turningRadius" : {
+    "base" : 5,
+    "max" : 10,
+    "step" : 1,
+    "stepCost" : 1000.0
+  },
+  "acceleration" : {
+    "base" : 50,
+    "max" : 100,
+    "step" : 1,
+    "stepCost" : 1000.0
+  },
+  "hitbox" : {
+    "length" : 2.0,
+    "width" : 1.0,
+    "height" : 1.0
+  },
+  "fuel" : {
+    "typeId" : "gasoline",
+    "usage" : 6.0
+  },
+  "exhaust" : {
+    "enabled" : true,
+    "particle" : "SMOKE_LARGE",
+    "xoffset" : -5.0,
+    "zoffset" : 0.0,
+    "yoffset" : 0.0
+  },
+  "horn" : {
+    "enabled" : true,
+    "sound" : "block.note_block.bass"
+  },
+  "sounds" : {
+    "idle" : {
+      "sound" : "car.idle",
+      "duration" : 6
+    },
+    "start" : {
+      "sound" : "car.start",
+      "duration" : 2
+    },
+    "accelerate" : {
+      "sound" : "car.accelerate",
+      "duration" : 2
+    },
+    "driving" : {
+      "sound" : "car.driving",
+      "duration" : 2
+    },
+    "slowingDown" : {
+      "sound" : "car.slowingdown",
+      "duration" : 2
+    }
+  },
+  "realisticSteering" : false,
+  "trunkSize" : 0,
+  "drift" : false,
+  "exitWhileMoving" : true,
+  "health" : 100
+}

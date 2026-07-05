@@ -1,0 +1,135 @@
+{
+  "id" : "subaru_impreza",
+  "displayName" : "&aSubaru Impreza",
+  "typeId" : "car",
+  "price" : 0.0,
+  "permissions" : {
+    "buy" : "vp.buy.ExampleCar",
+    "adjust" : "vp.adjust.ExampleCar",
+    "spawn" : "vp.spawn.ExampleCar",
+    "ride" : "vp.ride.ExampleCar",
+    "sitWithoutRidePermission" : true
+  },
+  "availableColors" : [ {
+    "red" : 0,
+    "green" : 0,
+    "blue" : 0
+  }],
+  "parts" : [ {
+    "type" : "skin",
+    "xoffset" : 0.0,
+    "yoffset" : 0.0,
+    "zoffset" : 0.0,
+    "item" : {
+      "damage" : 8,
+      "material" : "LEATHER_LEGGINGS",
+      "unbreakable" : true,
+      "color" : {
+        "red" : 0,
+        "green" : 0,
+        "blue" : 0
+      }
+    }
+  }, {
+    "type" : "seat",
+    "xoffset" : 0.0,
+    "yoffset" : -1.0,
+    "zoffset" : 0.6,
+    "steer" : true
+  }, {
+    "type" : "seat",
+    "xoffset" : 0.0,
+    "yoffset" : -1.0,
+    "zoffset" : -0.6,
+    "steer" : false
+  }, {
+    "type" : "seat",
+    "xoffset" : -1.3,
+    "yoffset" : -1.0,
+    "zoffset" : 0.6,
+    "steer" : false
+  }, {
+    "type" : "seat",
+    "xoffset" : -1.3,
+    "yoffset" : -1.0,
+    "zoffset" : 0.0,
+    "steer" : false
+  }, {
+    "type" : "seat",
+    "xoffset" : -1.3,
+    "yoffset" : -1.0,
+    "zoffset" : -0.6,
+    "steer" : false
+  } ],
+  "maxSpeed" : {
+    "base" : 100,
+    "max" : 200,
+    "step" : 5,
+    "stepCost" : 1000.0
+  },
+  "fuelTank" : {
+    "base" : 50,
+    "max" : 100,
+    "step" : 5,
+    "stepCost" : 1000.0
+  },
+  "turningRadius" : {
+    "base" : 7,
+    "max" : 15,
+    "step" : 1,
+    "stepCost" : 1000.0
+  },
+  "acceleration" : {
+    "base" : 50,
+    "max" : 100,
+    "step" : 5,
+    "stepCost" : 1000.0
+  },
+  "hitbox" : {
+    "length" : 3.0,
+    "width" : 2.0,
+    "height" : 1.0
+  },
+  "fuel" : {
+    "typeId" : "gasoline",
+    "usage" : 6.0
+  },
+  "exhaust" : {
+    "enabled" : true,
+    "particle" : "SMOKE_LARGE",
+    "xoffset" : -5.0,
+    "zoffset" : 0.0,
+    "yoffset" : 0.0
+  },
+  "horn" : {
+    "enabled" : true,
+    "sound" : "block.note_block.bass"
+  },
+  "sounds" : {
+    "idle" : {
+      "sound" : "car.idle",
+      "duration" : 6
+    },
+    "start" : {
+      "sound" : "car.start",
+      "duration" : 2
+    },
+    "accelerate" : {
+      "sound" : "car.accelerate",
+      "duration" : 2
+    },
+    "driving" : {
+      "sound" : "car.driving",
+      "duration" : 2
+    },
+    "slowingDown" : {
+      "sound" : "car.slowingdown",
+      "duration" : 2
+    }
+  },
+  "realisticSteering" : false,
+  "trunkSize" : 27,
+  "drift" : true,
+  "exitWhileMoving" : true,
+  "health" : 100
+}

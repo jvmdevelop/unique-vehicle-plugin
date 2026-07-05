@@ -44,8 +44,8 @@ public class VehicleSteeringWheelProcessor extends Processor {
         Player driver = vehicle.getDriver();
         if (driver != null) {
             Input input = driver.getCurrentInput();
-            if (input.isLeft()) target = MAX_STEER_ANGLE;
-            if (input.isRight()) target = -MAX_STEER_ANGLE;
+            if (input.isLeft()) target = -MAX_STEER_ANGLE;
+            if (input.isRight()) target = MAX_STEER_ANGLE;
         }
 
         float current = vehicle.getSteeringAngle();

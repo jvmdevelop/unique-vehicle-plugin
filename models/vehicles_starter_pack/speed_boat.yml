@@ -1,0 +1,165 @@
+className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.BaseVehicle
+name: speed_boat
+handModel: true
+vehicleType: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.types.BoatType
+baseColorList:
+  list0: &id001
+    ==: Color
+    RED: 0
+    GREEN: 0
+    BLUE: 0
+partList:
+  list0:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.skins.Skin
+    skin:
+      ==: org.bukkit.inventory.ItemStack
+      type: LEATHER_HELMET
+      damage: 31
+      meta:
+        ==: ItemMeta
+        meta-type: LEATHER_ARMOR
+        Unbreakable: true
+    color: &id001
+    xOffset: 0.0
+    yOffset: 0.0
+    zOffset: 0.0
+    UID: eb886e95-f6f4-4bd2-af18-be693dd8f2fe
+    isCustomPlaced: false
+  list1:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: true
+    xOffset: 0.0
+    yOffset: -0.6
+    zOffset: 0.6
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list2:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: 0.0
+    yOffset: -0.6
+    zOffset: -0.6
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list3:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -1.5
+    yOffset: -0.6
+    zOffset: 0.6
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list4:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -2.8
+    yOffset: -0.6
+    zOffset: 0.6
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list5:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -4.0
+    yOffset: -0.6
+    zOffset: 0.6
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list6:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -1.5
+    yOffset: -0.6
+    zOffset: -0.6
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list7:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -2.8
+    yOffset: -0.6
+    zOffset: -0.6
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list8:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -4.0
+    yOffset: -0.6
+    zOffset: -0.6
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list9:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -1.5
+    yOffset: -0.6
+    zOffset: 0.0
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list10:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -2.8
+    yOffset: -0.6
+    zOffset: 0.0
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+  list11:
+    className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.addons.seats.Seat
+    steer: false
+    xOffset: -4.0
+    yOffset: -0.6
+    zOffset: 0.0
+    UID: fb806fb5-ff06-45ef-8edf-e950b5adc6e4
+    isCustomPlaced: false
+speedSettings:
+  className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.base.storage.StorageUpgradeable
+  base: 100
+  max: 200
+  step: 5
+  upgradeCost: 1000
+fuelTankSettings:
+  className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.base.storage.StorageUpgradeable
+  base: 50
+  max: 100
+  step: 5
+  upgradeCost: 1000
+turningRadiusSettings:
+  className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.base.storage.StorageUpgradeable
+  base: 7
+  max: 15
+  step: 1
+  upgradeCost: 1000
+accelerationSettings:
+  className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.base.storage.StorageUpgradeable
+  base: 50
+  max: 100
+  step: 5
+  upgradeCost: 1000
+hornSettings:
+  className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.base.storage.StorageHorn
+  enabled: true
+  sound: BASS
+drift: true
+exhaustSettings:
+  className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.base.storage.StorageSmoke
+  enabled: false
+  xOffset: -5.0
+  yOffset: 0.0
+  zOffset: 0.0
+  particleName: SMOKE_LARGE
+canExitWhileMoving: true
+price: 1
+fuelSettings:
+  className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.base.storage.StorageFuel
+  usage: 6.0
+  type: GASOLINE
+health: 100
+trunkSize: 27
+hitbox:
+  className: me.legofreak107.vehiclesplus.vehicles.vehicles.objects.base.storage.StorageHitbox
+  length: 3.0
+  width: 2.0
+  height: 1.0
+steeringType: true

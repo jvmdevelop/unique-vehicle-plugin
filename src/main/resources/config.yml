@@ -4,9 +4,9 @@ vehicles:
       material: BARRIER
       custom-model-data: 1
       offset:
-        x: 0
+        x: 0.1
         y: 0
-        z: 0
+        z: 1
     steering-wheel:
       material: BARRIER
       custom-model-data: 2
@@ -66,9 +66,9 @@ vehicles:
       offset:
         x: 0.2375
         y: 0.5
-        z: 1.5
+        z: 1
     physics:
-      max-speed: 1.2
+      max-speed: 1.8
       acceleration: 0.05
       friction: 0.02
       turn-rate: 3.5
