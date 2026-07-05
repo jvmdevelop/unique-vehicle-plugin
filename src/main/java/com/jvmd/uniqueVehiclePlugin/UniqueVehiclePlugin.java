@@ -4,11 +4,8 @@ import com.jvmd.uniqueVehiclePlugin.assembler.VehicleAssembler;
 import com.jvmd.uniqueVehiclePlugin.command.VehicleCommand;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfigParser;
-import com.jvmd.uniqueVehiclePlugin.customization.VehicleDatabase;
 import com.jvmd.uniqueVehiclePlugin.listener.VehicleListener;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.SeatPacketManager;
-import com.jvmd.uniqueVehiclePlugin.listener.ResourcePackListener;
-import com.jvmd.uniqueVehiclePlugin.resourcepack.ResourcePackServer;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleBodyManager;
 import com.jvmd.uniqueVehiclePlugin.manager.impl.VehicleMovingManager;
 import com.jvmd.uniqueVehiclePlugin.processor.impl.*;
@@ -16,17 +13,12 @@ import com.jvmd.uniqueVehiclePlugin.registry.VehicleRegistry;
 import com.jvmd.uniqueVehiclePlugin.task.VehicleTickTask;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 public final class UniqueVehiclePlugin extends JavaPlugin {
 
     private VehicleRegistry registry;
-    private VehicleDatabase database;
-    private ResourcePackServer resourcePackServer;
 
     @Override
     public void onEnable() {
@@ -34,15 +26,6 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
 
         VehicleConfigParser parser = new VehicleConfigParser();
         Map<String, VehicleConfig> vehicleConfigs = parser.parseAll(getConfig());
-
-        database = new VehicleDatabase();
-        try {
-            database.init(this);
-        } catch (SQLException e) {
-            getLogger().severe("Failed to initialize SQLite database: " + e.getMessage());
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
 
         registry = new VehicleRegistry();
         VehicleAssembler assembler = new VehicleAssembler();
@@ -74,7 +57,7 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
         VehicleTickTask tickTask = new VehicleTickTask(movingManager, bodyManager, registry, seatPacketController);
         tickTask.runTaskTimer(this, 0L, 1L);
 
-        VehicleCommand command = new VehicleCommand(vehicleConfigs, assembler, registry, database);
+        VehicleCommand command = new VehicleCommand(vehicleConfigs, assembler, registry);
         getCommand("vehicle").setExecutor(command);
         getCommand("vehicle").setTabCompleter(command);
 
@@ -86,12 +69,6 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
     public void onDisable() {
         if (registry != null) {
             registry.unregisterAll();
-        }
-        if (database != null) {
-            database.close();
-        }
-        if (resourcePackServer != null) {
-            resourcePackServer.stop();
         }
         getLogger().info("UniqueVehiclePlugin disabled. All vehicles removed.");
     }

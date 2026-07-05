@@ -2,8 +2,6 @@ package com.jvmd.uniqueVehiclePlugin.command;
 
 import com.jvmd.uniqueVehiclePlugin.assembler.VehicleAssembler;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
-import com.jvmd.uniqueVehiclePlugin.customization.VehicleCustomization;
-import com.jvmd.uniqueVehiclePlugin.customization.VehicleDatabase;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.registry.VehicleRegistry;
 import org.bukkit.command.Command;
@@ -22,14 +20,12 @@ public class VehicleCommand implements CommandExecutor, TabCompleter {
     private final Map<String, VehicleConfig> vehicleConfigs;
     private final VehicleAssembler assembler;
     private final VehicleRegistry registry;
-    private final VehicleDatabase database;
 
     public VehicleCommand(Map<String, VehicleConfig> vehicleConfigs, VehicleAssembler assembler,
-                          VehicleRegistry registry, VehicleDatabase database) {
+                          VehicleRegistry registry) {
         this.vehicleConfigs = vehicleConfigs;
         this.assembler = assembler;
         this.registry = registry;
-        this.database = database;
     }
 
     @Override
@@ -67,8 +63,7 @@ public class VehicleCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        VehicleCustomization customization = database.load(id);
-        Vehicle vehicle = assembler.assemble(config, player.getLocation(), customization);
+        Vehicle vehicle = assembler.assemble(config, player.getLocation());
         registry.register(vehicle);
         player.sendMessage("Vehicle '" + id + "' spawned.");
     }

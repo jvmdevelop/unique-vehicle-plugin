@@ -3,7 +3,6 @@ package com.jvmd.uniqueVehiclePlugin.entity;
 
 import com.jvmd.uniqueVehiclePlugin.config.PhysicsConfig;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
-import com.jvmd.uniqueVehiclePlugin.customization.VehicleCustomization;
 import com.jvmd.uniqueVehiclePlugin.util.VehicleTransformUtil;
 import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.Location;
@@ -29,14 +28,13 @@ public class Vehicle {
     private final Wheel[] wheels;
     private final Entity seat;
     private final Interaction hitbox;
-    private final VehicleCustomization customization;
     private Location location;
     private double speed;
     private boolean drifting;
     private UUID driverId;
     private float steeringAngle;
 
-    public Vehicle(VehicleConfig config, VehicleFrame frame, ItemDisplay steeringWheel, VehicleDoor[] doors, Wheel[] wheels, Entity seat, Interaction hitbox, Location location, VehicleCustomization customization) {
+    public Vehicle(VehicleConfig config, VehicleFrame frame, ItemDisplay steeringWheel, VehicleDoor[] doors, Wheel[] wheels, Entity seat, Interaction hitbox, Location location) {
         this.config = config;
         this.frame = frame;
         this.steeringWheel = steeringWheel;
@@ -45,7 +43,6 @@ public class Vehicle {
         this.seat = seat;
         this.hitbox = hitbox;
         this.location = location;
-        this.customization = customization;
     }
 
     public Player getDriver() {
@@ -96,15 +93,12 @@ public class Vehicle {
 
     private Location computeSeatLocation() {
         Vector3d seatOffset = config.seatOffset();
-        var c = customization.getPart("seat");
-        float scale = customization.getGlobalScale();
-        Location seatLoc = VehicleTransformUtil.computePartLocation(location,
-                (seatOffset.x + c.getDeltaX()) * scale,
-                (seatOffset.y + c.getDeltaY()) * scale,
-                (seatOffset.z + c.getDeltaZ()) * scale);
+
+        Location seatLoc = VehicleTransformUtil.computePartLocation(location, seatOffset.x, seatOffset.y, seatOffset.z);
         seatLoc.setYaw(location.getYaw());
         return seatLoc;
     }
+
     public void toggleDoors() {
         for (VehicleDoor door : doors) {
             door.toggleDoor();
@@ -141,8 +135,6 @@ public class Vehicle {
             hitbox.remove();
         }
     }
-
-    public VehicleCustomization getCustomization() { return customization; }
 
     public PhysicsConfig getPhysics() {
         return config.physics();

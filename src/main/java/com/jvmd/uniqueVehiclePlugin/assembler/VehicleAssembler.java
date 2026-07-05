@@ -20,36 +20,31 @@ import org.joml.Vector3f;
 
 public class VehicleAssembler {
 
-    public Vehicle assemble(VehicleConfig config, Location location, VehicleCustomization customization) {
+    public Vehicle assemble(VehicleConfig config, Location location) {
         location = location.clone();
         location.setPitch(0);
         World world = location.getWorld();
-        float scale = customization.getGlobalScale();
 
-        VehicleFrame frame = buildFrame(config.frame(), location, world, scale);
-        ItemDisplay steeringWheel = spawnDisplay(config.steeringWheel(), location, world, scale);
+        VehicleFrame frame = buildFrame(config.frame(), location, world);
+        ItemDisplay steeringWheel = spawnDisplay(config.steeringWheel(), location, world);
 
         VehicleDoor[] doors = new VehicleDoor[config.doors().size()];
         for (int i = 0; i < config.doors().size(); i++) {
             VehicleConfig.DoorPartConfig doorConfig = config.doors().get(i);
-            ItemDisplay doorDisplay = spawnDisplay(doorConfig.part(), location, world, scale);
+            ItemDisplay doorDisplay = spawnDisplay(doorConfig.part(), location, world);
             doors[i] = new VehicleDoor(doorConfig.doorType(), doorDisplay, doorConfig.part().offset());
         }
 
         Wheel[] wheels = new Wheel[config.wheels().size()];
         for (int i = 0; i < config.wheels().size(); i++) {
             VehicleConfig.WheelPartConfig wheelConfig = config.wheels().get(i);
-            ItemDisplay wheelDisplay = spawnDisplay(wheelConfig.part(), location, world, scale);
+            ItemDisplay wheelDisplay = spawnDisplay(wheelConfig.part(), location, world);
             wheels[i] = new Wheel(wheelConfig.wheelType(), wheelConfig.front(), wheelDisplay, wheelConfig.part().offset());
         }
 
-        var seatCustom = customization.getPart("seat");
         Vector3d seatOffset = config.seatOffset();
-        float seatScale = customization.getGlobalScale();
-        Location seatLoc = location.clone().add(
-                (seatOffset.x + seatCustom.getDeltaX()) * seatScale,
-                (seatOffset.y + seatCustom.getDeltaY()) * seatScale,
-                (seatOffset.z + seatCustom.getDeltaZ()) * seatScale);
+        Location seatLoc = location.clone().add(seatOffset.x, seatOffset.y, seatOffset.z);
+
         org.bukkit.entity.ArmorStand seat = world.spawn(seatLoc, org.bukkit.entity.ArmorStand.class, as -> {
             as.setInvisible(true);
             as.setVisible(false);
@@ -69,15 +64,15 @@ public class VehicleAssembler {
             entity.setResponsive(true);
         });
 
-        return new Vehicle(config, frame, steeringWheel, doors, wheels, seat, hitbox, location, customization);
+        return new Vehicle(config, frame, steeringWheel, doors, wheels, seat, hitbox, location);
     }
 
-    private VehicleFrame buildFrame(PartConfig config, Location location, World world, float scale) {
-        ItemDisplay display = spawnDisplay(config, location, world, scale);
+    private VehicleFrame buildFrame(PartConfig config, Location location, World world) {
+        ItemDisplay display = spawnDisplay(config, location, world);
         return new VehicleFrame(display, config.offset());
     }
 
-    private ItemDisplay spawnDisplay(PartConfig config, Location baseLocation, World world, float scale) {
+    private ItemDisplay spawnDisplay(PartConfig config, Location baseLocation, World world) {
         Location spawnLoc = baseLocation.clone().add(config.offset().x, config.offset().y, config.offset().z);
 
         return world.spawn(spawnLoc, ItemDisplay.class, entity -> {
@@ -89,11 +84,7 @@ public class VehicleAssembler {
             entity.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
             entity.setTeleportDuration(1);
             entity.setInterpolationDuration(2);
-            entity.setTransformation(new Transformation(
-                    new Vector3f(0, 0, 0),
-                    new Quaternionf(),
-                    new Vector3f(scale, scale, scale),
-                    new Quaternionf()));
+            entity.setTransformation(new Transformation(new Vector3f(0, 0, 0), new Quaternionf(), new Vector3f(0, 0, 0), new Quaternionf()));
         });
     }
 }
