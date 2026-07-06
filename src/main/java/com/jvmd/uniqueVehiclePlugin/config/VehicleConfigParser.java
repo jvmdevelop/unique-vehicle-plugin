@@ -2,6 +2,7 @@ package com.jvmd.uniqueVehiclePlugin.config;
 
 import com.jvmd.uniqueVehiclePlugin.entity.DoorType;
 import com.jvmd.uniqueVehiclePlugin.entity.WheelType;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -34,16 +35,6 @@ public class VehicleConfigParser {
         PartConfig frame = parsePart(section.getConfigurationSection("frame"));
         PartConfig steeringWheel = parsePart(section.getConfigurationSection("steering-wheel"));
 
-        List<VehicleConfig.DoorPartConfig> doors = new ArrayList<>();
-        List<?> doorsList = section.getMapList("doors");
-        for (Object entry : doorsList) {
-            if (entry instanceof Map<?, ?> map) {
-                DoorType doorType = DoorType.valueOf(((String) map.get("type")).toUpperCase());
-                PartConfig part = parsePartFromMap(map);
-                doors.add(new VehicleConfig.DoorPartConfig(doorType, part));
-            }
-        }
-
         List<VehicleConfig.WheelPartConfig> wheels = new ArrayList<>();
         List<?> wheelsList = section.getMapList("wheels");
         for (Object entry : wheelsList) {
@@ -54,12 +45,22 @@ public class VehicleConfigParser {
                 wheels.add(new VehicleConfig.WheelPartConfig(wheelType, front, part));
             }
         }
+        List<?> passengerSeatsLocationSection = section.getMapList("passenger_seats_position");
+        List<Vector3d> passengerSeatPosition = new ArrayList<>();
+        for (Object entry : passengerSeatsLocationSection) {
+            if (entry instanceof Map<?, ?> map) {
+                double x = (double) map.get("x");
+                double y = (double) map.get("y");
+                double z = (double) map.get("z");
+                passengerSeatPosition.add(new Vector3d(x,y,z));
+            }
+        }
 
         Vector3d seatOffset = parseVec3(section.getConfigurationSection("seat.offset"));
 
         PhysicsConfig physics = parsePhysics(section.getConfigurationSection("physics"));
 
-        return new VehicleConfig(id, frame, steeringWheel, doors, wheels, seatOffset, physics);
+        return new VehicleConfig(id, frame, steeringWheel, wheels, seatOffset, physics, passengerSeatPosition, passengerSeatPosition.size());
     }
 
     private PhysicsConfig parsePhysics(ConfigurationSection section) {

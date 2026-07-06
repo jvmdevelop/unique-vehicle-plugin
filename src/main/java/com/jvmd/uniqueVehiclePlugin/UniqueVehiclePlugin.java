@@ -40,7 +40,6 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
         VehicleSpeedometerProcessor speedometerProcessor = new VehicleSpeedometerProcessor(vehicles);
 
         VehicleFrameProcessor frameProcessor = new VehicleFrameProcessor(vehicles);
-        VehicleDoorsProcessor doorsProcessor = new VehicleDoorsProcessor(vehicles);
         VehicleWheelsProcessor wheelsProcessor = new VehicleWheelsProcessor(vehicles);
         VehicleSteeringWheelProcessor steeringWheelProcessor = new VehicleSteeringWheelProcessor(vehicles);
         SeatPacketManager seatPacketController = new SeatPacketManager();
@@ -49,7 +48,7 @@ public final class UniqueVehiclePlugin extends JavaPlugin {
                 drivingProcessor, driftProcessor, brakeProcessor, physicsProcessor,
                 soundProcessor, speedometerProcessor, vehicles
         );
-        VehicleBodyManager bodyManager = new VehicleBodyManager(frameProcessor, doorsProcessor, wheelsProcessor, steeringWheelProcessor, vehicles);
+        VehicleBodyManager bodyManager = new VehicleBodyManager(frameProcessor, wheelsProcessor, steeringWheelProcessor, vehicles);
 
         VehicleListener listener = new VehicleListener(registry, physicsProcessor, seatPacketController);
         registry.setOnRemoveCallback(listener::onVehicleRemoved);

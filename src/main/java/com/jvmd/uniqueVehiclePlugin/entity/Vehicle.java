@@ -49,7 +49,6 @@ public class Vehicle {
         this.availableSeats = avaliableSeats;
     }
 
-
     public Player getDriver() {
         if (driverId == null) return null;
         return Bukkit.getPlayer(driverId);

@@ -14,21 +14,13 @@ vehicles:
         x: 0.125
         y: 0.75
         z: 1.75
-    doors:
-      - type: LEFT
-        material: BARRIER
-        custom-model-data: 3
-        offset:
-          x: 0.6875
-          y: 0.875
-          z: 1.125
-      - type: RIGHT
-        material: BARRIER
-        custom-model-data: 3
-        offset:
-          x: -0.6875
-          y: 0.875
-          z: 1.125
+    passenger_seats_position:
+        - x: 2
+          y: 2
+          z: 2
+        - x: 2
+          y: 2
+          z: 2
     wheels:
       - type: LEFT
         front: true

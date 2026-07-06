@@ -2,12 +2,13 @@ package com.jvmd.uniqueVehiclePlugin.assembler;
 
 import com.jvmd.uniqueVehiclePlugin.config.PartConfig;
 import com.jvmd.uniqueVehiclePlugin.config.VehicleConfig;
-import com.jvmd.uniqueVehiclePlugin.customization.VehicleCustomization;
 import com.jvmd.uniqueVehiclePlugin.entity.Vehicle;
 import com.jvmd.uniqueVehiclePlugin.entity.VehicleFrame;
 import com.jvmd.uniqueVehiclePlugin.entity.Wheel;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Interaction;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
@@ -27,13 +28,6 @@ public class VehicleAssembler {
         VehicleFrame frame = buildFrame(config.frame(), location, world);
         ItemDisplay steeringWheel = spawnDisplay(config.steeringWheel(), location, world);
 
-        VehicleDoor[] doors = new VehicleDoor[config.doors().size()];
-        for (int i = 0; i < config.doors().size(); i++) {
-            VehicleConfig.DoorPartConfig doorConfig = config.doors().get(i);
-            ItemDisplay doorDisplay = spawnDisplay(doorConfig.part(), location, world);
-            doors[i] = new VehicleDoor(doorConfig.doorType(), doorDisplay, doorConfig.part().offset());
-        }
-
         Wheel[] wheels = new Wheel[config.wheels().size()];
         for (int i = 0; i < config.wheels().size(); i++) {
             VehicleConfig.WheelPartConfig wheelConfig = config.wheels().get(i);
@@ -44,7 +38,7 @@ public class VehicleAssembler {
         Vector3d seatOffset = config.seatOffset();
         Location seatLoc = location.clone().add(seatOffset.x, seatOffset.y, seatOffset.z);
 
-        org.bukkit.entity.ArmorStand seat = world.spawn(seatLoc, org.bukkit.entity.ArmorStand.class, as -> {
+        ArmorStand seat = world.spawn(seatLoc, ArmorStand.class, as -> {
             as.setInvisible(true);
             as.setVisible(false);
             as.setGravity(false);
@@ -57,13 +51,30 @@ public class VehicleAssembler {
             as.setCanPickupItems(false);
         });
 
+
+        Entity[] passengerSeat = new Entity[config.passengerSeatCount()];
+        for (int i = 0; i < config.passengerSeatCount(); i++) {
+            passengerSeat[i] = world.spawn(new Location(world, config.passengerSeatsPosition().get(i).x ,config.passengerSeatsPosition().get(i).y, config.passengerSeatsPosition().get(i).z), ArmorStand.class, as -> {
+                as.setInvisible(true);
+                as.setVisible(false);
+                as.setGravity(false);
+                as.setInvulnerable(true);
+                as.setSilent(true);
+                as.setSmall(true);
+                as.setMarker(true);
+                as.setCollidable(false);
+                as.setPersistent(false);
+                as.setCanPickupItems(false);
+            });
+        }
+
         Interaction hitbox = world.spawn(location, Interaction.class, entity -> {
             entity.setInteractionWidth(2.0f);
             entity.setInteractionHeight(2.0f);
             entity.setResponsive(true);
         });
 
-        return new Vehicle(config, frame, steeringWheel, doors, wheels, seat, hitbox, location);
+        return new Vehicle(config, frame, steeringWheel, wheels, seat, passengerSeat ,hitbox, location, config.passengerSeatCount(), new boolean[config.passengerSeatCount()]);
     }
 
     private VehicleFrame buildFrame(PartConfig config, Location location, World world) {

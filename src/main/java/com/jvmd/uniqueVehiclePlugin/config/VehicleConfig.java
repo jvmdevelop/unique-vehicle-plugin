@@ -1,6 +1,5 @@
 package com.jvmd.uniqueVehiclePlugin.config;
 
-import com.jvmd.uniqueVehiclePlugin.entity.DoorType;
 import com.jvmd.uniqueVehiclePlugin.entity.WheelType;
 import org.joml.Vector3d;
 
@@ -10,14 +9,12 @@ public record VehicleConfig(
         String id,
         PartConfig frame,
         PartConfig steeringWheel,
-        List<DoorPartConfig> doors,
         List<WheelPartConfig> wheels,
         Vector3d seatOffset,
-        PhysicsConfig physics
+        PhysicsConfig physics,
+        List<Vector3d> passengerSeatsPosition,
+        int passengerSeatCount
 ) {
-
-    public record DoorPartConfig(DoorType doorType, PartConfig part) {
-    }
 
     public record WheelPartConfig(WheelType wheelType, boolean front, PartConfig part) {
     }
