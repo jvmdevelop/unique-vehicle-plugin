@@ -52,8 +52,10 @@ public class VehicleRegistry {
 
     public Vehicle getByDriver(Entity passenger) {
         for (Vehicle vehicle : vehicles) {
-            if (passenger instanceof Player player && vehicle.isDriver(player)) {
-                return vehicle;
+            if (passenger instanceof Player player) {
+                if (vehicle.isDriver(player) || vehicle.isPassenger(player)){
+                    return vehicle;
+                }
             }
         }
         return null;

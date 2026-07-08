@@ -45,14 +45,15 @@ public class VehicleConfigParser {
                 wheels.add(new VehicleConfig.WheelPartConfig(wheelType, front, part));
             }
         }
-        List<?> passengerSeatsLocationSection = section.getMapList("passenger_seats_position");
+        List<?> passengerSeatsLocationSection = section.getMapList("passenger_seats_offset");
         List<Vector3d> passengerSeatPosition = new ArrayList<>();
         for (Object entry : passengerSeatsLocationSection) {
             if (entry instanceof Map<?, ?> map) {
-                double x = (double) map.get("x");
-                double y = (double) map.get("y");
-                double z = (double) map.get("z");
-                passengerSeatPosition.add(new Vector3d(x,y,z));
+                passengerSeatPosition.add(new Vector3d(
+                        toDouble(map.get("x")),
+                        toDouble(map.get("y")),
+                        toDouble(map.get("z"))
+                ));
             }
         }
 

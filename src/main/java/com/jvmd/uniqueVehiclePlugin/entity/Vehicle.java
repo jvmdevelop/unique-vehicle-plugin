@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.joml.Vector3d;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class Vehicle {
@@ -27,7 +28,7 @@ public class Vehicle {
     private final Entity[] passengerSeat;
     private final HashMap<UUID, Pair<Player, Integer>> passenger;
     private int availableSeatsCount;
-    private final boolean[] availableSeats;
+    private final boolean[] occupiedPassengerSeats;
     private final Interaction hitbox;
     private Location location;
     private double speed;
@@ -35,7 +36,7 @@ public class Vehicle {
     private UUID driverId;
     private float steeringAngle;
 
-    public Vehicle(VehicleConfig config, VehicleFrame frame, ItemDisplay steeringWheel, Wheel[] wheels, Entity seat, Entity[] passengerSeat, Interaction hitbox, Location location, int availableSeatsCount, boolean[] avaliableSeats) {
+    public Vehicle(VehicleConfig config, VehicleFrame frame, ItemDisplay steeringWheel, Wheel[] wheels, Entity seat, Entity[] passengerSeat, Interaction hitbox, Location location, int availableSeatsCount, boolean[] occupiedPassengerSeats) {
         this.config = config;
         this.frame = frame;
         this.steeringWheel = steeringWheel;
@@ -46,7 +47,7 @@ public class Vehicle {
         this.passenger = new HashMap<>();
         this.hitbox = hitbox;
         this.location = location;
-        this.availableSeats = avaliableSeats;
+        this.occupiedPassengerSeats = occupiedPassengerSeats;
     }
 
     public Player getDriver() {
@@ -72,6 +73,9 @@ public class Vehicle {
     public boolean hasEntity(Entity entity) {
         UUID id = entity.getUniqueId();
         if (seat != null && seat.getUniqueId().equals(id)) return true;
+        for (Entity passengerSeatEntity : passengerSeat) {
+            if (passengerSeatEntity != null && passengerSeatEntity.getUniqueId().equals(id)) return true;
+        }
         if (hitbox != null && hitbox.getUniqueId().equals(id)) return true;
         if (steeringWheel != null && steeringWheel.getUniqueId().equals(id)) return true;
         if (frame != null && frame.getItemDisplay().getUniqueId().equals(id)) return true;
@@ -86,10 +90,22 @@ public class Vehicle {
 
         Location seatLoc = computeSeatLocation();
         seat.teleport(seatLoc, TeleportFlag.EntityState.RETAIN_PASSENGERS);
+        int index = 0;
+        for (Location passengerSeatLocation : computePassengersSeatLocations()) {
+            passengerSeat[index].teleport(passengerSeatLocation, TeleportFlag.EntityState.RETAIN_PASSENGERS);
+            index++;
+        }
+
 
         if (hitbox != null) {
             hitbox.teleport(location);
         }
+    }
+
+    private List<Location> computePassengersSeatLocations() {
+        return config.passengerSeatsOffset().stream()
+                .map(offset -> VehicleTransformUtil.computePartLocation(location, offset.x, offset.y, offset.z))
+                .toList();
     }
 
     private Location computeSeatLocation() {
@@ -110,6 +126,12 @@ public class Vehicle {
         if (seat != null) {
             seat.eject();
             seat.remove();
+        }
+        for (Entity passengerSeatEntity : passengerSeat) {
+            if (passengerSeatEntity != null) {
+                passengerSeatEntity.eject();
+                passengerSeatEntity.remove();
+            }
         }
         if (hitbox != null) {
             hitbox.remove();
@@ -174,9 +196,9 @@ public class Vehicle {
 
 
     private int getAvailableSeatIndex() {
-        if (availableSeatsCount>0) {
-            for (int index = 0; index < availableSeats.length; index++) {
-                if (availableSeats[index]) {
+        if (availableSeatsCount > 0) {
+            for (int index = 0; index < occupiedPassengerSeats.length; index++) {
+                if (!occupiedPassengerSeats[index]) {
                     return index;
                 }
             }
@@ -184,19 +206,29 @@ public class Vehicle {
         return -1;
     }
 
-    public void addPassenger(Player player) {
-        if (availableSeatsCount <= 0) return;
+    public boolean addPassenger(Player player) {
+        if (player == null || isPassenger(player) || availableSeatsCount <= 0) return false;
         int availableIndex = getAvailableSeatIndex();
+        if (availableIndex == -1) return false;
         passenger.put(player.getUniqueId(), Pair.of(player, availableIndex));
-        availableSeats[availableIndex] = true;
+        if (!passengerSeat[availableIndex].addPassenger(player)) {
+            passenger.remove(player.getUniqueId());
+            return false;
+        }
+        occupiedPassengerSeats[availableIndex] = true;
         availableSeatsCount--;
+        return true;
     }
 
     public Entity unmountPassenger(UUID playerUUID) {
         Pair<Player, Integer> playerWithAvailableCount = passenger.remove(playerUUID);
         if (playerWithAvailableCount == null) return null;
         Integer index = playerWithAvailableCount.right();
-        availableSeats[index] = false;
+        Player player = Bukkit.getPlayer(playerUUID);
+        if (player != null) {
+            passengerSeat[index].removePassenger(player);
+        }
+        occupiedPassengerSeats[index] = false;
         availableSeatsCount++;
 
         return passengerSeat[index];
@@ -208,5 +240,9 @@ public class Vehicle {
 
     public HashMap<UUID, Pair<Player, Integer>> getPassenger() {
         return passenger;
+    }
+
+    public boolean isPassenger(Player player) {
+        return passenger.containsKey(player.getUniqueId());
     }
 }

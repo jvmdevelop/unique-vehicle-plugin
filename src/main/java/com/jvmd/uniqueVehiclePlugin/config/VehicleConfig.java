@@ -12,7 +12,7 @@ public record VehicleConfig(
         List<WheelPartConfig> wheels,
         Vector3d seatOffset,
         PhysicsConfig physics,
-        List<Vector3d> passengerSeatsPosition,
+        List<Vector3d> passengerSeatsOffset,
         int passengerSeatCount
 ) {
 

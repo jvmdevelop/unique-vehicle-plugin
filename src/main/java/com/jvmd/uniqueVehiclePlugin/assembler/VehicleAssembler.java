@@ -54,7 +54,8 @@ public class VehicleAssembler {
 
         Entity[] passengerSeat = new Entity[config.passengerSeatCount()];
         for (int i = 0; i < config.passengerSeatCount(); i++) {
-            passengerSeat[i] = world.spawn(new Location(world, config.passengerSeatsPosition().get(i).x ,config.passengerSeatsPosition().get(i).y, config.passengerSeatsPosition().get(i).z), ArmorStand.class, as -> {
+            Location passengerSeatLocation = location.clone().add(config.passengerSeatsOffset().get(i).x, config.passengerSeatsOffset().get(i).y, config.passengerSeatsOffset().get(i).z);
+            passengerSeat[i] = world.spawn(passengerSeatLocation, ArmorStand.class, as -> {
                 as.setInvisible(true);
                 as.setVisible(false);
                 as.setGravity(false);
@@ -74,7 +75,7 @@ public class VehicleAssembler {
             entity.setResponsive(true);
         });
 
-        return new Vehicle(config, frame, steeringWheel, wheels, seat, passengerSeat ,hitbox, location, config.passengerSeatCount(), new boolean[config.passengerSeatCount()]);
+        return new Vehicle(config, frame, steeringWheel, wheels, seat, passengerSeat, hitbox, location, config.passengerSeatCount(), new boolean[config.passengerSeatCount()]);
     }
 
     private VehicleFrame buildFrame(PartConfig config, Location location, World world) {
@@ -94,7 +95,7 @@ public class VehicleAssembler {
             entity.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
             entity.setTeleportDuration(1);
             entity.setInterpolationDuration(2);
-            entity.setTransformation(new Transformation(new Vector3f(0, 0, 0), new Quaternionf(), new Vector3f(0, 0, 0), new Quaternionf()));
+            entity.setTransformation(new Transformation(new Vector3f(0, 0, 0), new Quaternionf(), new Vector3f(1, 1, 1), new Quaternionf()));
         });
     }
 }
